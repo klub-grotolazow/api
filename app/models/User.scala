@@ -3,8 +3,9 @@ package models
 import com.mongodb.casbah.MongoClient
 import com.mongodb.casbah.commons.MongoDBObject
 import com.typesafe.config.ConfigFactory
-import org.json4s.DefaultFormats
-import org.json4s.JsonAST.{JObject, JValue}
+import org.bson.types.ObjectId
+import org.json4s.{Extraction, CustomSerializer, DefaultFormats}
+import org.json4s.JsonAST.{JInt, JString, JObject, JValue}
 import com.mongodb.DBObject
 
 /**
@@ -12,13 +13,21 @@ import com.mongodb.DBObject
  */
 
 case class User(
-                 id: Long,
+                 id: String,
                  firstName: String,
                  lastName: String,
-                 /** add Regex */ email: String,
-                 /** add Regex */ peselNr: String,
-                 /** add Regex */ idCardNr: String,
-                 /** add Regex */ feeStatus: String,
+
+                 /** add Regex */
+                 email: String,
+
+                 /** add Regex */
+                 peselNr: String,
+
+                 /** add Regex */
+                 idCardNr: String,
+
+                 /** add Regex */
+                 feeStatus: String,
                  hoursPoints: Int,
 
                  /** add type address */
@@ -29,13 +38,51 @@ case class User(
                  apartmentNr: Option[Int] = None,
                  zipCode: Option[String] = None,
 
-                 /** add Regex */ gender: Option[String] = None,
+                 /** add Regex */
+                 gender: Option[String] = None,
                  age: Option[String] = None,
-                 /** add Regex */ indexNr: Option[String] = None,
-                 /** add Regex */ phoneNr: Option[String] = None
+
+                 /** add Regex */
+                 indexNr: Option[String] = None,
+
+                 /** add Regex */
+                 phoneNr: Option[String] = None
                  )
 
-object User  {
+object User {
+
+  class UserSerializer extends CustomSerializer[User](implicit format => ( {
+    /** serializer */
+    case body: JValue =>
+      val id = (body \ "id").extractOrElse(new ObjectId().toString)
+      val firstName = (body \ "firstName").extract[String]
+      val lastName = (body \ "lastName").extract[String]
+      val email = (body \ "email").extract[String]
+      val peselNr = (body \ "peselNr").extract[String]
+      val idCardNr = (body \ "idCardNr").extract[String]
+      val feeStatus = (body \ "feeStatus").extract[String]
+      val hoursPoints = (body \ "hoursPoints").extract[Int]
+
+      User(id, firstName, lastName, email, peselNr, idCardNr, feeStatus, hoursPoints)
+  }, {
+    /** deserializer */
+    case User(id, firstName, lastName, email, peselNr, idCardNr, feeStatus, hoursPoints,
+    None, None, None, None, None, None, None, None, None, None) =>
+      JObject(
+        List(
+          "id" -> JString(id),
+          "firstName" -> JString(firstName),
+          "lastName" -> JString(lastName),
+          "email" -> JString(email),
+          "peselNr" -> JString(peselNr),
+          "idCardNr" -> JString(idCardNr),
+          "feeStatus" -> JString(feeStatus),
+          "hoursPoints" -> JInt(hoursPoints)
+        )
+      )
+  }))
+
+}
 
 /*  val collectionName = "users"
   val config = ConfigFactory.load
@@ -75,5 +122,3 @@ object User  {
 
     data.extract[Map[String, Any]]
   }*/
-
-}

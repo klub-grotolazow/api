@@ -9,9 +9,10 @@ import play.api.libs.iteratee.{Enumeratee, Iteratee, Done, Traversable}
 import play.api.libs.iteratee.Input.{Empty, El}
 import org.json4s.JsonAST.{JString, JValue}
 import org.json4s.JsonDSL._
-import org.json4s.jackson.JsonMethods
+import org.json4s.jackson.{Serialization, JsonMethods}
 import org.json4s.jackson.JsonMethods._
 import org.json4s.jackson.Serialization._
+import play.api.libs.json.Json
 import play.api.mvc.Results._
 import play.api.mvc._
 import play.api.Play
@@ -36,22 +37,40 @@ class UserCtrl extends Controller {
 
   val jsonParser = new Json4SParser()
 
+  val jsonHeader = ("Content-Type", "application/json")
+
   implicit val formats = DefaultFormats
 
   def create() = Action(jsonParser) { implicit request =>
-    val future = Future {
+    Future {
       //        Ok(request.body.extract[User])
-      val body: JValue = newDocument(request.body)
+//      val body: JValue = newDocument(request.body)
 //      collection.insert(jsonToDBObject(body).asInstanceOf[DBObject])
       //dbObjectToJson(removeFlag(idToId(object)))
 //      body
-      body
+
+//      val id = new ObjectId()
+//      val body = request.body merge ("id" -> id.toString)
+      implicit val formats = Serialization.formats(NoTypeHints)
+
+
+      val body = request.body
+      val json: play.api.mvc.Result = write(body)
+      Created(json)
+
+/*      body
 //      println(compact(JsonMethods.render(body)))
 
-    }.map {
+    }
+
+    future.map {
       inserted => Created(write(inserted)).withHeaders(
-        "Content-Type" -> "application/json",
-        "Location" -> (request.host + "/users/" + inserted))
+//        "Content-Type" -> "application/json",
+      jsonHeader,
+      LOCATION -> s"/groups/${inserted.id}")
+//        "Location" -> (request.host + "/users/" + inserted))*/
+
+
     }.recover(errorRecovery)
 //    Ok("test")
 
