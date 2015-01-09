@@ -13,7 +13,7 @@ import com.mongodb.DBObject
  */
 
 case class User(
-                 id: String,
+//                 id: String,
                  firstName: String,
                  lastName: String,
 
@@ -28,7 +28,7 @@ case class User(
 
                  /** add Regex */
                  feeStatus: String,
-                 hoursPoints: Int,
+                 hoursPoints: Int/*,
 
                  /** add type address */
                  voivodeship: Option[String] = None,
@@ -46,7 +46,7 @@ case class User(
                  indexNr: Option[String] = None,
 
                  /** add Regex */
-                 phoneNr: Option[String] = None
+                 phoneNr: Option[String] = None*/
                  )
 
 object User {
@@ -54,23 +54,31 @@ object User {
   class UserSerializer extends CustomSerializer[User](implicit format => ( {
     /** serializer */
     case body: JValue =>
-      val id = (body \ "id").extractOrElse(new ObjectId().toString)
-      val firstName = (body \ "firstName").extract[String]
-      val lastName = (body \ "lastName").extract[String]
-      val email = (body \ "email").extract[String]
-      val peselNr = (body \ "peselNr").extract[String]
-      val idCardNr = (body \ "idCardNr").extract[String]
-      val feeStatus = (body \ "feeStatus").extract[String]
+//      val id = (body \ "id").extractOrElse(new ObjectId().toString)
+//      val id = new ObjectId().toString
+//      val firstName = (body \ "firstName").extract[String]
+      val firstName = "Ania"
+//      val lastName = (body \ "lastName").extract[String]
+      val lastName = "Kijania"
+//      val email = (body \ "email").extract[String]
+      val email = "ania_to@gmail.com"
+//      val peselNr = (body \ "peselNr").extract[String]
+      val peselNr = "070072772"
+//      val idCardNr = (body \ "idCardNr").extract[String]
+      val idCardNr = "ania12345"
+//      val feeStatus = (body \ "feeStatus").extract[String]
+      val feeStatus = "all on time"
       val hoursPoints = (body \ "hoursPoints").extract[Int]
+//      val hoursPoints = 0
 
-      User(id, firstName, lastName, email, peselNr, idCardNr, feeStatus, hoursPoints)
+      User(/*id, */firstName, lastName, email, peselNr, idCardNr, feeStatus, hoursPoints)
   }, {
     /** deserializer */
-    case User(id, firstName, lastName, email, peselNr, idCardNr, feeStatus, hoursPoints,
-    None, None, None, None, None, None, None, None, None, None) =>
+    case User(/*id, */firstName, lastName, email, peselNr, idCardNr, feeStatus, hoursPoints) =>
+//    None, None, None, None, None, None, None, None, None, None) =>
       JObject(
         List(
-          "id" -> JString(id),
+//          "id" -> JString(id),
           "firstName" -> JString(firstName),
           "lastName" -> JString(lastName),
           "email" -> JString(email),
