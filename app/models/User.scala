@@ -1,12 +1,8 @@
 package models
 
-import com.mongodb.casbah.MongoClient
-import com.mongodb.casbah.commons.MongoDBObject
-import com.typesafe.config.ConfigFactory
-import org.bson.types.ObjectId
-import org.json4s.{Extraction, CustomSerializer, DefaultFormats}
-import org.json4s.JsonAST.{JInt, JString, JObject, JValue}
-import com.mongodb.DBObject
+import play.api.Play
+import com.novus.salat.Context
+import play.api.libs.json._
 
 /**
  * Created by michal on 28.11.14.
@@ -18,17 +14,19 @@ case class User(
                  lastName: String,
 
                  /** add Regex */
-                 email: String,
+                 email: String
+//                 ,
 
                  /** add Regex */
-                 peselNr: String,
+//                 peselNr: String,
 
                  /** add Regex */
-                 idCardNr: String,
+//                 idCardNr: String,
 
                  /** add Regex */
-                 feeStatus: String,
-                 hoursPoints: Int/*,
+//                 feeStatus: String,
+//                 hoursPoints: Int
+/*,
 
                  /** add type address */
                  voivodeship: Option[String] = None,
@@ -49,46 +47,50 @@ case class User(
                  phoneNr: Option[String] = None*/
                  )
 
+/*object JsonFormats {
+  import play.api.libs.json.Json
+
+  implicit val userFormat = Json.format[User]
+}*/
+
 object User {
+/*  implicit val userReads = new Reads[User] {
+    def reads(js: JsValue): JsResult[User] = {
+      (js \ "firstName").validate[String].flatMap { firstName =>
+        (js \ "lastName").validate[String].flatMap { lastName =>
+          (js \ "email").validate[String].map { email =>
+            User(firstName, lastName, email)
+          }
+        }
+      }
+    }
+  }*/
+  import play.api.libs.functional.syntax._
+  import play.api.libs.json._
+  import play.api.libs.json.Reads._
 
-  class UserSerializer extends CustomSerializer[User](implicit format => ( {
-    /** serializer */
-    case body: JValue =>
-//      val id = (body \ "id").extractOrElse(new ObjectId().toString)
-//      val id = new ObjectId().toString
-//      val firstName = (body \ "firstName").extract[String]
-      val firstName = "Ania"
-//      val lastName = (body \ "lastName").extract[String]
-      val lastName = "Kijania"
-//      val email = (body \ "email").extract[String]
-      val email = "ania_to@gmail.com"
-//      val peselNr = (body \ "peselNr").extract[String]
-      val peselNr = "070072772"
-//      val idCardNr = (body \ "idCardNr").extract[String]
-      val idCardNr = "ania12345"
-//      val feeStatus = (body \ "feeStatus").extract[String]
-      val feeStatus = "all on time"
-      val hoursPoints = (body \ "hoursPoints").extract[Int]
-//      val hoursPoints = 0
+  implicit val userReads: Reads[User] = (
+    (__ \ "firstName").read[String] ~
+    (__ \ "lastName").read[String] ~
+    (__ \ "email").read(email)
+  )(User.apply _)
 
-      User(/*id, */firstName, lastName, email, peselNr, idCardNr, feeStatus, hoursPoints)
-  }, {
-    /** deserializer */
-    case User(/*id, */firstName, lastName, email, peselNr, idCardNr, feeStatus, hoursPoints) =>
-//    None, None, None, None, None, None, None, None, None, None) =>
-      JObject(
-        List(
-//          "id" -> JString(id),
-          "firstName" -> JString(firstName),
-          "lastName" -> JString(lastName),
-          "email" -> JString(email),
-          "peselNr" -> JString(peselNr),
-          "idCardNr" -> JString(idCardNr),
-          "feeStatus" -> JString(feeStatus),
-          "hoursPoints" -> JInt(hoursPoints)
-        )
+/*  implicit val userWrites = new Writes[User] {
+    def writes(u: User): JsValue = {
+      Json.obj(
+        "firstName" -> u.firstName,
+        "lastName" -> u.lastName,
+        "email" -> u.email
       )
-  }))
+    }
+  }*/
+  implicit val userWrites = (
+    (__ \ "firstName").write[String] ~
+    (__ \ "lastName").write[String] ~
+    (__ \ "email").write[String]
+  )(unlift(User.unapply))
+
+
 
 }
 

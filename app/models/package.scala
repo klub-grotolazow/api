@@ -1,3 +1,7 @@
+import com.novus.salat.Context
+import play.api.Play
+
+/*
 import models.User.UserSerializer
 import org.json4s.DefaultFormats
 
@@ -17,3 +21,6 @@ package object models {
       new UserSerializer
   }
 }
+*/
+
+
