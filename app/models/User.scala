@@ -5,7 +5,7 @@ import play.api.libs.json._
 import play.api.libs.json.Reads._
 
 case class User(
-//                 id: String,
+                 id: String,
                  firstName: String,
                  lastName: String,
                  email: String
@@ -36,12 +36,14 @@ case class User(
 
 object User {
   implicit val userReads: Reads[User] = (
+    (__ \ "id").read[String] ~
     (__ \ "firstName").read[String] ~
     (__ \ "lastName").read[String] ~
     (__ \ "email").read(email)
   )(User.apply _)
 
   implicit val userWrites: Writes[User] = (
+    (__ \ "id").write[String] ~
     (__ \ "firstName").write[String] ~
     (__ \ "lastName").write[String] ~
     (__ \ "email").write[String]
