@@ -29,11 +29,6 @@ trait MongoDatabase[T <: AnyRef] {
     case Failure(_) => key
   }
 
-  def _idToId(dbObject: DBObject) = {
-    dbObject.put("id", dbObject.get("_id").toString)
-    dbObject
-  }
-
   def insert(collectionName: String, modelObject: T)(implicit manifest: Manifest[T]): T = {
     val collection = db(collectionName)
 
@@ -48,14 +43,13 @@ trait MongoDatabase[T <: AnyRef] {
 
     val dbObjects = collection.find()
     /** needs deserialization from DBObject to e.g. models.User */
-    dbObjects.map(dbObject => grater[T].asObject(_idToId(dbObject))).toList
-//    dbObjects.map(dbObject => grater[T].asObject(dbObject)).toList
+    dbObjects.map(dbObject => grater[T].asObject(dbObject)).toList
   }
 
   def readOne(collectionName: String, id: String)(implicit manifest: Manifest[T]) = {
     val collection = db(collectionName)
     val dao = new SalatDAO[T, ObjectId](collection) {}
 
-    dao.findOne(MongoDBObject("_id" -> tryObjectId(id)))
+    dao.findOne(MongoDBObject("_id" -> id))
   }
 }

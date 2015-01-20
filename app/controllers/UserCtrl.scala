@@ -32,7 +32,5 @@ class UserCtrl extends Controller with MongoDatabase[User] {
       case Some(user) => Ok(Json.toJson(user)).withHeaders(jsonHeader)
       case None => NotFound
     }
-//      .map(user => Ok(Json.toJson(user)).withHeaders(jsonHeader))
-//      .getOrElse(NotFound)
   }
 }
