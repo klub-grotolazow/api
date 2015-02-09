@@ -4,3 +4,4 @@ GET     /assets/*file               controllers.Assets.at(path="/public", file)
 POST     /users                     @controllers.UserCtrl.create
 GET      /users                     @controllers.UserCtrl.getList
 GET      /users/$userId<[a-z0-9]+>  @controllers.UserCtrl.getOne(userId: String)
+PUT      /users/$userId<[a-z0-9]+>  @controllers.UserCtrl.edit(userId: String)

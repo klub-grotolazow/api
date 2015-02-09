@@ -38,7 +38,7 @@ trait MongoDatabase[T <: AnyRef] {
     modelObject
   }
 
-  def readList(collectionName: String)(implicit manifest: Manifest[T]): List[T] = {
+  def find(collectionName: String)(implicit manifest: Manifest[T]): List[T] = {
     val collection = db(collectionName)
 
     val dbObjects = collection.find()
@@ -46,10 +46,22 @@ trait MongoDatabase[T <: AnyRef] {
     dbObjects.map(dbObject => grater[T].asObject(dbObject)).toList
   }
 
-  def readOne(collectionName: String, id: String)(implicit manifest: Manifest[T]) = {
+  def findOne(collectionName: String, id: String)(implicit manifest: Manifest[T]) = {
     val collection = db(collectionName)
     val dao = new SalatDAO[T, ObjectId](collection) {}
 
     dao.findOne(MongoDBObject("_id" -> id))
+  }
+  
+  def update(collectionName: String, id: String, modelObject: T)(implicit manifest: Manifest[T]) = {
+    val collection = db(collectionName)
+    val dao = new SalatDAO[T, ObjectId](collection) {}
+    val dbObject = grater[T].asDBObject(modelObject)
+    
+    dao.findOne(MongoDBObject("_id" -> id)).map { oldDbObject =>
+      dao.update(MongoDBObject("_id" -> id), dbObject, upsert = false, multi = false)
+      modelObject
+
+    }
   }
 }
