@@ -48,20 +48,29 @@ trait MongoDatabase[T <: AnyRef] {
 
   def findOne(collectionName: String, id: String)(implicit manifest: Manifest[T]) = {
     val collection = db(collectionName)
-    val dao = new SalatDAO[T, ObjectId](collection) {}
+    val dao = new SalatDAO[T, String](collection) {}
 
-    dao.findOne(MongoDBObject("_id" -> id))
+    dao.findOneById(id)
   }
   
   def update(collectionName: String, id: String, modelObject: T)(implicit manifest: Manifest[T]) = {
     val collection = db(collectionName)
-    val dao = new SalatDAO[T, ObjectId](collection) {}
+    val dao = new SalatDAO[T, String](collection) {}
     val dbObject = grater[T].asDBObject(modelObject)
-    
-    dao.findOne(MongoDBObject("_id" -> id)).map { oldDbObject =>
+
+    dao.findOneById(id).map { oldDbObject =>
       dao.update(MongoDBObject("_id" -> id), dbObject, upsert = false, multi = false)
       modelObject
+    }
+  }
 
+  def delete(collectionName: String, id: String)(implicit manifest: Manifest[T]) = {
+    val collection = db(collectionName)
+    val dao = new SalatDAO[T, String](collection) {}
+
+    dao.findOneById(id).map { oldDbObject =>
+      dao.removeById(id)
+      oldDbObject
     }
   }
 }

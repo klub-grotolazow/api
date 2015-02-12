@@ -44,4 +44,11 @@ class UserCtrl extends Controller with MongoDatabase[User] {
       e => BadRequest("Detected error:" + JsError.toFlatJson(e))
     }
   }
+  
+  def remove(id: String) = Action {
+    delete(collectionName = "users", id)
+      .map(user => Ok(Json.toJson(user)).withHeaders(jsonHeader))
+      .getOrElse(NotFound)
+  }
+  
 }

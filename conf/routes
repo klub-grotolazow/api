@@ -5,3 +5,4 @@ POST     /users                     @controllers.UserCtrl.create
 GET      /users                     @controllers.UserCtrl.getList
 GET      /users/$userId<[a-z0-9]+>  @controllers.UserCtrl.getOne(userId: String)
 PUT      /users/$userId<[a-z0-9]+>  @controllers.UserCtrl.edit(userId: String)
+DELETE   /users/$userId<[a-z0-9]+>  @controllers.UserCtrl.remove(userId: String)
