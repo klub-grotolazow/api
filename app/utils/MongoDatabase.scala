@@ -1,6 +1,5 @@
 package utils
 
-import com.mongodb.ServerAddress
 import com.mongodb.casbah.MongoClient
 import com.novus.salat.dao.SalatDAO
 import com.typesafe.config.ConfigFactory
@@ -12,24 +11,11 @@ import scala.util.{Success, Failure, Try}
 
 trait MongoDatabase[T <: AnyRef] {
   val config = ConfigFactory.load
-  val mongoDbHost = config.getString("mongodb.host")
-  val mongoDbPort = config.getInt("mongodb.port")
-  val dbName = config.getString("mongodb.dbname")
-  val dbUser = config.getString("mongodb.user")
-  val dbPassword = config.getString("mongodb.password")
-  val uri = MongoClientURI(config.getString("mongodb.uri"))
+  val uri = MongoClientURI(config.getString("mongodb.herokuDatabaseUri"))
 
-//  val mongoClient = MongoClient(mongoDbHost, mongoDbPort)
-//  val db = mongoClient(dbName)
-//  val credentials = MongoCredential.createMongoCRCredential(dbUser, dbName, dbPassword.toCharArray)
-//  val server = new ServerAddress(mongoDbHost, mongoDbPort)
-//  val mongoClient = MongoClient(server, List(credentials))
-//    val db = mongoClient(dbName)
   val mongoClient = MongoClient(uri)
   val db = mongoClient(uri.database.get)
-//  println("UWAGA AUTENTYKUJE DO " + db.getName)
-//  db.authenticate(uri.username.get, uri.password.foldLeft("")(_ + _.toString))
-  
+
   /** hack to bypass Play dynamic classloader when serializing to database */
   implicit val ctx = new Context {
     val name = "Custom_Classloader"
