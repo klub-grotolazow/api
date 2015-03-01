@@ -1,8 +1,43 @@
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
 
+# COURSE
+POST     /courses                       @controllers.CourseCtrl.create
+GET      /courses                       @controllers.CourseCtrl.getList
+GET      /courses/$courseId<[a-z0-9]+>  @controllers.CourseCtrl.getOne(courseId: String)
+PUT      /courses/$courseId<[a-z0-9]+>  @controllers.CourseCtrl.edit(courseId: String)
+DELETE   /courses/$courseId<[a-z0-9]+>  @controllers.CourseCtrl.remove(courseId: String)
+
+# DOCUMENT TEMPLATE
+POST     /documentTemplates                                 @controllers.DocumentTemplateCtrl.create
+GET      /documentTemplates                                 @controllers.DocumentTemplateCtrl.getList
+GET      /documentTemplates/$documentTemplateId<[a-z0-9]+>  @controllers.DocumentTemplateCtrl.getOne(documentTemplateId: String)
+PUT      /documentTemplates/$documentTemplateId<[a-z0-9]+>  @controllers.DocumentTemplateCtrl.edit(documentTemplateId: String)
+DELETE   /documentTemplates/$documentTemplateId<[a-z0-9]+>  @controllers.DocumentTemplateCtrl.remove(documentTemplateId: String)
+
+# EQUIPMENT
+POST     /equipments                          @controllers.EquipmentCtrl.create
+GET      /equipments                          @controllers.EquipmentCtrl.getList
+GET      /equipments/$equipmentId<[a-z0-9]+>  @controllers.EquipmentCtrl.getOne(equipmentId: String)
+PUT      /equipments/$equipmentId<[a-z0-9]+>  @controllers.EquipmentCtrl.edit(equipmentId: String)
+DELETE   /equipments/$equipmentId<[a-z0-9]+>  @controllers.EquipmentCtrl.remove(equipmentId: String)
+
+# PAYMENT
+POST     /payments                        @controllers.PaymentCtrl.create
+GET      /payments                        @controllers.PaymentCtrl.getList
+GET      /payments/$paymentId<[a-z0-9]+>  @controllers.PaymentCtrl.getOne(paymentId: String)
+PUT      /payments/$paymentId<[a-z0-9]+>  @controllers.PaymentCtrl.edit(paymentId: String)
+DELETE   /payments/$paymentId<[a-z0-9]+>  @controllers.PaymentCtrl.remove(paymentId: String)
+
 # USER
 POST     /users                     @controllers.UserCtrl.create
 GET      /users                     @controllers.UserCtrl.getList
 GET      /users/$userId<[a-z0-9]+>  @controllers.UserCtrl.getOne(userId: String)
 PUT      /users/$userId<[a-z0-9]+>  @controllers.UserCtrl.edit(userId: String)
 DELETE   /users/$userId<[a-z0-9]+>  @controllers.UserCtrl.remove(userId: String)
+
+# USER ACCOUNT
+POST     /userAccounts                            @controllers.UserAccountCtrl.create
+GET      /userAccounts                            @controllers.UserAccountCtrl.getList
+GET      /userAccounts/$userAccountId<[a-z0-9]+>  @controllers.UserAccountCtrl.getOne(userAccountId: String)
+PUT      /userAccounts/$userAccountId<[a-z0-9]+>  @controllers.UserAccountCtrl.edit(userAccountId: String)
+DELETE   /userAccounts/$userAccountId<[a-z0-9]+>  @controllers.UserAccountCtrl.remove(userAccountId: String)
