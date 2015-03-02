@@ -8,7 +8,7 @@ case class Payment(
                     _id: String,
                     paymentType: String,
                     amount: Int,
-                    status: String,
+                    paymentStatus: String,       // todo add Enums
                     dueDate: String,
 
                     user_id: String,
@@ -21,7 +21,7 @@ object Payment {
     ((__ \ "_id").read[String] orElse Reads.pure(new ObjectId().toString)) ~
     (__ \ "paymentType").read[String] ~
     (__ \ "amount").read[Int] ~
-    (__ \ "status").read[String] ~
+    (__ \ "paymentStatus").read[String] ~
     (__ \ "dueDate").read[String] ~
     (__ \ "user_id").read[String] ~
     (__ \ "course_id").read[String] ~

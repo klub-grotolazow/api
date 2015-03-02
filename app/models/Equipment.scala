@@ -6,40 +6,40 @@ import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 
 case class RopeParameters(
-                           ropeLength: Option[Int],
-                           ropeDiameter: Option[Int],
-                           ropeType: Option[String]
+                           ropeLength: Int,
+                           ropeDiameter: Int,
+                           ropeType: String                 // todo add Enums
                          )
 
 case class EquipmentHire(
-                          reservationDate: String,
-                          hireDate: Option[String],
-                          receivingDate: Option[String],
+                          reservationDate: String,          // todo add dateFormat
+                          hireDate: Option[String],         // todo add dateFormat
+                          receivingDate: Option[String],    // todo add dateFormat
                           delayedDays: Option[Int],
-                          conditionStatus: Option[String],
+                          conditionStatus: Option[String],  // todo add Enums
 
                           user_id: String,
-                          warehouseMan_id: String
+                          warehouseman_id: String
                         )
 
 case class Equipment(
                       _id: String,
                       serialNumber: String,
                       name: String,
-                      equipmentType: String,
+                      equipmentType: String,                  // todo add Enums
                       isAvailable: Boolean,
                       isServicing: Boolean,
                       isReserved: Boolean,
                       isHired: Boolean,
-                      allowedFor: List[String],
+                      allowedFor: List[String],               // todo add Enums
                       producer: Option[String],
-                      purchaseDate: Option[String],
-                      nextInspectionDate: Option[String],
+                      purchaseDate: Option[String],           // todo add dateFormat
+                      nextInspectionDate: Option[String],     // todo add dateFormat
                       price: Option[Int],
-                      condition: Option[String], 
+                      condition: Option[String],              // todo add Enums
                       description: Option[String],
                       ropeParameters: Option[RopeParameters],
-                      carabinerType: Option[String],
+                      carabinerType: Option[String],          // todo add Enums
                       hireHistory: List[EquipmentHire]
                     )
 

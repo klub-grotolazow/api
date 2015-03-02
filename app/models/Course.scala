@@ -6,11 +6,11 @@ import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 case class CourseMeeting(
                            place: String,
-                           date: String,
+                           date: String,                // todo add dateFormat
                            subject: String,
                            description: Option[String],
-                           meetingType: Option[String],
-                           meetingStatus: Option[String],
+                           meetingType: Option[String], // todo add Enums
+                           meetingStatus: String,       // todo add Enums
 
                            presentMembers_ids: List[String]
                          )
@@ -18,8 +18,8 @@ case class CourseMeeting(
 case class Course(
                    _id: String,
                    name: String,
-                   courseType: String,
-                   meetingDates: List[String],    // you can get startDate and closeDate
+                   courseType: String,            // todo add Enums
+                   meetingDates: List[String],    // you can get startDate and closeDate // todo add dateFormat
                                                   // you can get date for specific meeting
                    places: List[String],
                    description: String, 

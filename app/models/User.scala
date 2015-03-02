@@ -20,45 +20,29 @@ case class User(
                  lastName: String,
                  membershipTypeTag: String,        // todo add Enum
                  courseRole: String,               // todo add Enum
-                 paymentRole: String,
-                 warehouseRole: String,
+                 paymentRole: String,              // todo add Enum
+                 warehouseRole: String,            // todo add Enum
                  email: String,
                  peselNr: Option[String],          // todo add Regex
                  idCardNr: Option[String],         // todo add Regex
-                 feeStatus: String,                // todo add Regex
+                 feeStatus: String,                // todo add Enum
                  hoursPoints: Int,
                  address: Option[Address],
-                 gender: Option[String],    // todo add Enum
+                 gender: Option[String],           // todo add Enum
                  age: Option[Int],
-                 phoneNr: Option[String],   // todo add Regex
-                 indexNr: Option[String],          // for student
-                 instructorCard: Option[String],          // for instructor
-                 instructorSpecialization: Option[String],// for instructor
+                 phoneNr: Option[String],
+                 indexNr: Option[String],          // todo add Regex       // for student
+                 instructorCard: Option[String],   // todo add Regex       // for instructor
+                 instructorSpecialization: Option[String], // todo add Enum// for instructor
                  
                  currentCourses_ids: List[String],
-                 loanEquipments_ids: List[String]
+                 hiredEquipments_ids: List[String]
                )
 
 object Address {
   implicit val addressReads: Reads[Address] = Json.reads[Address]
-//    (
-//    (__ \ "voivodeship").readNullable[String] ~
-//    (__ \ "town").read[String] ~
-//    (__ \ "street").read[String] ~
-//    (__ \ "buildingNr").read[Int] ~
-//    (__ \ "apartmentNr").readNullable[Int] ~
-//    (__ \ "zipCode").readNullable[String]
-//  )(Address.apply _)
   
-  implicit val addressWrites: Writes[Address] = Json.writes[Address] 
-//    (
-//    (__ \ "voivodeship").writeNullable[String] ~
-//    (__ \ "town").write[String] ~
-//    (__ \ "street").write[String] ~
-//    (__ \ "buildingNr").write[Int] ~
-//    (__ \ "apartmentNr").writeNullable[Int] ~
-//    (__ \ "zipCode").writeNullable[String]
-//  )(unlift(Address.unapply))
+  implicit val addressWrites: Writes[Address] = Json.writes[Address]
 
   implicit val addressFormat: Format[Address] =
   Format(addressReads, addressWrites)
@@ -86,33 +70,10 @@ object User {
     (__ \ "instructorCard").readNullable[String] ~
     (__ \ "instructorSpecialization").readNullable[String] ~
     (__ \ "currentCourses_ids").read[List[String]] ~
-    (__ \ "loanEquipments_ids").read[List[String]]
+    (__ \ "hiredEquipments_ids").read[List[String]]
   )(User.apply _)
 
   implicit val userWrites: Writes[User] = Json.writes[User]
-//    (
-//    (__ \ "_id").write[String] ~
-//      (__ \ "firstName").write[String] ~
-//      (__ \ "lastName").write[String] ~
-//      (__ \ "membershipTypeTag").write[String] ~
-//      (__ \ "courseRole").write[String] ~
-//      (__ \ "paymentRole").write[String] ~
-//      (__ \ "warehouseRole").write[String] ~
-//      (__ \ "email").write[String] ~
-//      (__ \ "peselNr").writeNullable[String] ~
-//      (__ \ "idCardNr").writeNullable[String] ~
-//      (__ \ "feeStatus").write[String] ~
-//      (__ \ "hoursPoints").write[Int] ~
-//      (__ \ "address").writeNullable[Address] ~
-//      (__ \ "gender").writeNullable[String] ~
-//      (__ \ "age").writeNullable[Int] ~
-//      (__ \ "phoneNr").writeNullable[String] ~
-//      (__ \ "indexNr").writeNullable[String] ~
-//      (__ \ "instructorCard").writeNullable[String] ~
-//      (__ \ "instructorSpecialization").writeNullable[String] ~
-//      (__ \ "currentCourses_ids").write[List[String]] ~
-//      (__ \ "loanEquipments_ids").write[List[String]]
-//  )(unlift(User.unapply))
 
   implicit val userFormat: Format[User] =
   Format(userReads, userWrites)
