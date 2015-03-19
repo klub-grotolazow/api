@@ -6,9 +6,10 @@ case class UserAccount(
                         _id: String,
                         login: String,
                         password_hash: String,
-                        membershipTypeTag: String,
-                        courseRole: String,                 
-                        paymentRole: String,
+                        membershipTypeTag: String,        // todo add Enum
+                        courseRole: String,               // todo add Enum
+                        paymentRole: String,              // todo add Enum
+                        warehouseRole: String,            // todo add Enum
 
                         user_id: String
                       )

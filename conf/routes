@@ -1,43 +1,83 @@
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
 
+# USER
+POST     /users                                                         @controllers.UserCtrl.create
+GET      /users                                                         @controllers.UserCtrl.getList
+GET      /users/$uId<[a-z0-9]+>                                         @controllers.UserCtrl.getOne(uId: String)
+PUT      /users/$uId<[a-z0-9]+>                                         @controllers.UserCtrl.edit(uId: String)
+DELETE   /users/$uId<[a-z0-9]+>                                         @controllers.UserCtrl.remove(uId: String)
+
+GET      /users/$uId<[a-z0-9]+>/courses                                 @controllers.UserCtrl.getCoursesList(uId: String)
+GET      /users/$uId<[a-z0-9]+>/equipments                              @controllers.UserCtrl.getEquipmentsList(uId: String)
+GET      /users/$uId<[a-z0-9]+>/payments                                @controllers.UserCtrl.getPaymentsList(uId: String)
+
 # COURSE
-POST     /courses                       @controllers.CourseCtrl.create
-GET      /courses                       @controllers.CourseCtrl.getList
-GET      /courses/$courseId<[a-z0-9]+>  @controllers.CourseCtrl.getOne(courseId: String)
-PUT      /courses/$courseId<[a-z0-9]+>  @controllers.CourseCtrl.edit(courseId: String)
-DELETE   /courses/$courseId<[a-z0-9]+>  @controllers.CourseCtrl.remove(courseId: String)
+POST     /courses                                                       @controllers.CourseCtrl.create
+GET      /courses                                                       @controllers.CourseCtrl.getList
+GET      /courses/$cId<[a-z0-9]+>                                       @controllers.CourseCtrl.getOne(cId: String)
+PUT      /courses/$cId<[a-z0-9]+>                                       @controllers.CourseCtrl.edit(cId: String)
+DELETE   /courses/$cId<[a-z0-9]+>                                       @controllers.CourseCtrl.remove(cId: String)
+
+POST     /courses/$cId<[a-z0-9]+>/meetings                              @controllers.CourseCtrl.createMeeting(cId: String)
+GET      /courses/$cId<[a-z0-9]+>/meetings                              @controllers.CourseCtrl.getMeetingsList(cId: String)
+GET      /courses/$cId<[a-z0-9]+>/meetings/$meetId<[a-z0-9]+>           @controllers.CourseCtrl.getOneMeeting(cId: String, meetId: String)
+PUT      /courses/$cId<[a-z0-9]+>/meetings/$meetId<[a-z0-9]+>           @controllers.CourseCtrl.editMeeting(cId: String, meetId: String)
+DELETE   /courses/$cId<[a-z0-9]+>/meetings/$meetId<[a-z0-9]+>           @controllers.CourseCtrl.removeMeeting(cId: String, meetId: String)
+
+GET      /courses/$cId<[a-z0-9]+>/meetings/$meetId<[a-z0-9]+>/members                      @controllers.CourseCtrl.getMeetingMembers(cId: String, meetId: String)
+PUT      /courses/$cId<[a-z0-9]+>/meetings/$meetId<[a-z0-9]+>/members/$memId<[a-z0-9]+>    @controllers.CourseCtrl.addMeetingMember(cId: String, meetId: String, memId: String)
+DELETE   /courses/$cId<[a-z0-9]+>/meetings/$meetId<[a-z0-9]+>/members/$memId<[a-z0-9]+>    @controllers.CourseCtrl.removeMeetingMember(cId: String, meetId: String, memId: String)
+
+GET      /courses/$cId<[a-z0-9]+>/members                               @controllers.CourseCtrl.getMembersList(cId: String)
+PUT      /courses/$cId<[a-z0-9]+>/members/$memId<[a-z0-9]+>             @controllers.CourseCtrl.addMember(cId: String, memId: String)
+DELETE   /courses/$cId<[a-z0-9]+>/members/$memId<[a-z0-9]+>             @controllers.CourseCtrl.removeMember(cId: String, memId: String)
+GET      /courses/$cId<[a-z0-9]+>/gradMembers                           @controllers.CourseCtrl.getGraduatedMembersList(cId: String)
+PUT      /courses/$cId<[a-z0-9]+>/gradMembers/$memId<[a-z0-9]+>         @controllers.CourseCtrl.addGraduatedMember(cId: String, memId: String)
+DELETE   /courses/$cId<[a-z0-9]+>/gradMembers/$memId<[a-z0-9]+>         @controllers.CourseCtrl.removeGraduatedMember(cId: String, memId: String)
+GET      /courses/$cId<[a-z0-9]+>/instructor                            @controllers.CourseCtrl.getInstructor(cId: String, iId: String)
+PUT      /courses/$cId<[a-z0-9]+>/instructor/$iId<[a-z0-9]+>            @controllers.CourseCtrl.changeInstructor(cId: String, iId: String)
+DELETE   /courses/$cId<[a-z0-9]+>/instructor                            @controllers.CourseCtrl.removeInstructor(cId: String)
+GET      /courses/$cId<[a-z0-9]+>/manager                               @controllers.CourseCtrl.getManager(cId: String, manId: String)
+PUT      /courses/$cId<[a-z0-9]+>/manager/$manId<[a-z0-9]+>             @controllers.CourseCtrl.changeManager(cId: String, manId: String)
+DELETE   /courses/$cId<[a-z0-9]+>/manager                               @controllers.CourseCtrl.removeManager(cId: String)
 
 # DOCUMENT TEMPLATE
-POST     /documentTemplates                                 @controllers.DocumentTemplateCtrl.create
-GET      /documentTemplates                                 @controllers.DocumentTemplateCtrl.getList
-GET      /documentTemplates/$documentTemplateId<[a-z0-9]+>  @controllers.DocumentTemplateCtrl.getOne(documentTemplateId: String)
-PUT      /documentTemplates/$documentTemplateId<[a-z0-9]+>  @controllers.DocumentTemplateCtrl.edit(documentTemplateId: String)
-DELETE   /documentTemplates/$documentTemplateId<[a-z0-9]+>  @controllers.DocumentTemplateCtrl.remove(documentTemplateId: String)
+POST     /documentTemplates                                             @controllers.DocumentTemplateCtrl.create
+GET      /documentTemplates                                             @controllers.DocumentTemplateCtrl.getList
+GET      /documentTemplates/$dtId<[a-z0-9]+>                            @controllers.DocumentTemplateCtrl.getOne(dtId: String)
+PUT      /documentTemplates/$dtId<[a-z0-9]+>                            @controllers.DocumentTemplateCtrl.edit(dtId: String)
+DELETE   /documentTemplates/$dtId<[a-z0-9]+>                            @controllers.DocumentTemplateCtrl.remove(dtId: String)
 
 # EQUIPMENT
-POST     /equipments                          @controllers.EquipmentCtrl.create
-GET      /equipments                          @controllers.EquipmentCtrl.getList
-GET      /equipments/$equipmentId<[a-z0-9]+>  @controllers.EquipmentCtrl.getOne(equipmentId: String)
-PUT      /equipments/$equipmentId<[a-z0-9]+>  @controllers.EquipmentCtrl.edit(equipmentId: String)
-DELETE   /equipments/$equipmentId<[a-z0-9]+>  @controllers.EquipmentCtrl.remove(equipmentId: String)
+POST     /equipments                                                    @controllers.EquipmentCtrl.create
+GET      /equipments                                                    @controllers.EquipmentCtrl.getList
+GET      /equipments/$eId<[a-z0-9]+>                                    @controllers.EquipmentCtrl.getOne(eId: String)
+PUT      /equipments/$eId<[a-z0-9]+>                                    @controllers.EquipmentCtrl.edit(eId: String)
+DELETE   /equipments/$eId<[a-z0-9]+>                                    @controllers.EquipmentCtrl.remove(eId: String)
+
+POST     /equipments/$eId<[a-z0-9]+>/hires                              @controllers.EquipmentCtrl.createHire(eId: String)
+GET      /equipments/$eId<[a-z0-9]+>/hires                              @controllers.EquipmentCtrl.getHiresList(eId: String)
+GET      /equipments/$eId<[a-z0-9]+>/hires/$hId<[a-z0-9]+>              @controllers.EquipmentCtrl.getOneHire(eId: String, hId: String)
+PUT      /equipments/$eId<[a-z0-9]+>/hires/$hId<[a-z0-9]+>              @controllers.EquipmentCtrl.editHire(eId: String, hId: String)
+DELETE   /equipments/$eId<[a-z0-9]+>/hires/$hId<[a-z0-9]+>              @controllers.EquipmentCtrl.removeHire(eId: String, hId: String)
+
+GET      /equipments/$eId<[a-z0-9]+>/hires/$hId<[a-z0-9]+>/user         @controllers.EquipmentCtrl.getHireUser(eId: String, hId: String)
+GET      /equipments/$eId<[a-z0-9]+>/hires/$hId<[a-z0-9]+>/warehouseman @controllers.EquipmentCtrl.getHireWarehouseman(eId: String, hId: String)
 
 # PAYMENT
-POST     /payments                        @controllers.PaymentCtrl.create
-GET      /payments                        @controllers.PaymentCtrl.getList
-GET      /payments/$paymentId<[a-z0-9]+>  @controllers.PaymentCtrl.getOne(paymentId: String)
-PUT      /payments/$paymentId<[a-z0-9]+>  @controllers.PaymentCtrl.edit(paymentId: String)
-DELETE   /payments/$paymentId<[a-z0-9]+>  @controllers.PaymentCtrl.remove(paymentId: String)
+POST     /payments                                                      @controllers.PaymentCtrl.create
+GET      /payments                                                      @controllers.PaymentCtrl.getList
+GET      /payments/$pId<[a-z0-9]+>                                      @controllers.PaymentCtrl.getOne(pId: String)
+PUT      /payments/$pId<[a-z0-9]+>                                      @controllers.PaymentCtrl.edit(pId: String)
+DELETE   /payments/$pId<[a-z0-9]+>                                      @controllers.PaymentCtrl.remove(pId: String)
 
-# USER
-POST     /users                     @controllers.UserCtrl.create
-GET      /users                     @controllers.UserCtrl.getList
-GET      /users/$userId<[a-z0-9]+>  @controllers.UserCtrl.getOne(userId: String)
-PUT      /users/$userId<[a-z0-9]+>  @controllers.UserCtrl.edit(userId: String)
-DELETE   /users/$userId<[a-z0-9]+>  @controllers.UserCtrl.remove(userId: String)
+GET      /payments/$pId<[a-z0-9]+>/user                                 @controllers.PaymentCtrl.getUser(pId: String)
+GET      /payments/$pId<[a-z0-9]+>/course                               @controllers.PaymentCtrl.getCourse(pId: String)
+GET      /payments/$pId<[a-z0-9]+>/accounter                            @controllers.PaymentCtrl.getAccounter(pId: String)
 
 # USER ACCOUNT
-POST     /userAccounts                            @controllers.UserAccountCtrl.create
-GET      /userAccounts                            @controllers.UserAccountCtrl.getList
-GET      /userAccounts/$userAccountId<[a-z0-9]+>  @controllers.UserAccountCtrl.getOne(userAccountId: String)
-PUT      /userAccounts/$userAccountId<[a-z0-9]+>  @controllers.UserAccountCtrl.edit(userAccountId: String)
-DELETE   /userAccounts/$userAccountId<[a-z0-9]+>  @controllers.UserAccountCtrl.remove(userAccountId: String)
+POST     /userAccounts                                                  @controllers.UserAccountCtrl.create
+GET      /userAccounts                                                  @controllers.UserAccountCtrl.getList
+GET      /userAccounts/$uaId<[a-z0-9]+>                                 @controllers.UserAccountCtrl.getOne(uaId: String)
+PUT      /userAccounts/$uaId<[a-z0-9]+>                                 @controllers.UserAccountCtrl.edit(uaId: String)
+DELETE   /userAccounts/$uaId<[a-z0-9]+>                                @controllers.UserAccountCtrl.remove(uaId: String)

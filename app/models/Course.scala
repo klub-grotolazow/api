@@ -5,8 +5,8 @@ import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 case class CourseMeeting(
+                           _id: String,                // todo date, how to make it unique ? todo add dateFormat
                            place: String,
-                           date: String,                // todo add dateFormat
                            subject: String,
                            description: Option[String],
                            meetingType: Option[String], // todo add Enums

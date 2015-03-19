@@ -12,7 +12,7 @@ case class RopeParameters(
                          )
 
 case class EquipmentHire(
-                          reservationDate: String,          // todo add dateFormat
+                          _id: String,          // todo reservationDate, how to make it unique? create even if empty, get date format where needed
                           hireDate: Option[String],         // todo add dateFormat
                           receivingDate: Option[String],    // todo add dateFormat
                           delayedDays: Option[Int],

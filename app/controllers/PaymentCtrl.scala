@@ -1,43 +1,40 @@
 package controllers
 
-import models.Payment
+import models.{Course, User, Payment}
 import play.api.libs.json.{JsError, Json}
 import play.api.mvc.{Action, Controller}
-import utils.MongoDatabase
+import utils.{MongoCollection, MongoDatabase}
 
 class PaymentCtrl extends Controller with MongoDatabase[Payment] {
 
   val jsonHeader = ("Content-Type", "application/json")
 
-  /** needs BodyParser BodyParsers.parse.asJson */
-  def create()(implicit manifest: Manifest[Payment]) = Action(parse.json) { request =>
-    /** needs deserializer implicit Reads */
+  def create() = Action(parse.json) { request =>
     request.body.validate[Payment].map { payment =>
-      insert(collectionName = "payments", payment)
-      /** needs serializer implicit Writes */
+      insert("payments", payment)
       Created(Json.toJson(payment)).withHeaders(jsonHeader, "Location" -> s"\\payments\\${payment._id}")
     }.recoverTotal {
       e => BadRequest("Detected error:" + JsError.toFlatJson(e))
     }
   }
 
-  def getList()(implicit manifest: Manifest[Payment]) = Action {
-    val payments: List[Payment] = find(collectionName = "payments")
+  def getList = Action {
+    val payments: List[Payment] = find("payments")
     Ok(Json.toJson(payments)).withHeaders(jsonHeader)
   }
 
   def getOne(id: String) = Action {
-    findOne(collectionName = "payments", id)
-      .map(payment => Ok(Json.toJson(payment)).withHeaders(jsonHeader))
-      .getOrElse(NotFound)
+    findOne("payments", id).map(payment => 
+      Ok(Json.toJson(payment)).withHeaders(jsonHeader)
+    ).getOrElse(NotFound)
   }
 
-  def edit(id: String)(implicit manifest: Manifest[Payment]) = Action(parse.json) { request =>
+  def edit(id: String) = Action(parse.json) { request =>
     request.body.validate[Payment].map(payment =>
-      update(collectionName = "payments", id, payment)
-        .map(payment => Ok(Json.toJson(payment)).withHeaders(jsonHeader))
-        .getOrElse {
-        insert(collectionName = "payments", payment)
+      update("payments", id, payment).map(payment => 
+        Ok(Json.toJson(payment)).withHeaders(jsonHeader)
+      ).getOrElse {
+        insert("payments", payment)
         Created(Json.toJson(payment)).withHeaders(jsonHeader)
       }
     ).recoverTotal {
@@ -46,9 +43,32 @@ class PaymentCtrl extends Controller with MongoDatabase[Payment] {
   }
 
   def remove(id: String) = Action {
-    delete(collectionName = "payments", id)
-      .map(payment => Ok(Json.toJson(payment)).withHeaders(jsonHeader))
-      .getOrElse(NotFound)
+    delete("payments", id).map(payment => 
+      Ok(Json.toJson(payment)).withHeaders(jsonHeader)
+    ).getOrElse(NotFound)
   }
 
+  def getUser(paymentId: String) = Action {
+    findOne("payments", paymentId).map(payment =>
+      new MongoCollection[User].findOne("users", payment.user_id).map(user =>
+        Ok(Json.toJson(user)).withHeaders(jsonHeader)
+      ).getOrElse(NotFound)
+    ).getOrElse(NotFound)
+  }
+  
+  def getCourse(paymentId: String) = Action {
+      findOne("payments", paymentId).map(payment =>
+        new MongoCollection[Course].findOne("courses", payment.course_id).map(course =>
+          Ok(Json.toJson(course)).withHeaders(jsonHeader)
+        ).getOrElse(NotFound)
+      ).getOrElse(NotFound)
+  }
+  
+  def getAccounter(paymentId: String) = Action {
+      findOne("payments", paymentId).map(payment =>
+        new MongoCollection[User].findOne("users", payment.accounter_id).map(accounter =>
+          Ok(Json.toJson(accounter)).withHeaders(jsonHeader)
+        ).getOrElse(NotFound)
+      ).getOrElse(NotFound)
+  }
 }

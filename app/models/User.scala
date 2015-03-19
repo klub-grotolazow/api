@@ -18,10 +18,6 @@ case class User(
                  _id: String,
                  firstName: String,
                  lastName: String,
-                 membershipTypeTag: String,        // todo add Enum
-                 courseRole: String,               // todo add Enum
-                 paymentRole: String,              // todo add Enum
-                 warehouseRole: String,            // todo add Enum
                  email: String,
                  peselNr: Option[String],          // todo add Regex
                  idCardNr: Option[String],         // todo add Regex
@@ -34,18 +30,14 @@ case class User(
                  indexNr: Option[String],          // todo add Regex       // for student
                  instructorCard: Option[String],   // todo add Regex       // for instructor
                  instructorSpecialization: Option[String], // todo add Enum// for instructor
-                 
                  currentCourses_ids: List[String],
-                 hiredEquipments_ids: List[String]
+                 hiredEquipments_ids: List[String],
+                 payments_ids: List[String]
                )
 
 object Address {
   implicit val addressReads: Reads[Address] = Json.reads[Address]
-  
   implicit val addressWrites: Writes[Address] = Json.writes[Address]
-
-  implicit val addressFormat: Format[Address] =
-  Format(addressReads, addressWrites)
 }
 
 object User {
@@ -53,10 +45,6 @@ object User {
     ((__ \ "_id").read[String] orElse Reads.pure(new ObjectId().toString)) ~
     (__ \ "firstName").read[String] ~
     (__ \ "lastName").read[String] ~
-    (__ \ "membershipTypeTag").read[String] ~
-    (__ \ "courseRole").read[String] ~
-    (__ \ "paymentRole").read[String] ~
-    (__ \ "warehouseRole").read[String] ~
     (__ \ "email").read(email) ~
     (__ \ "peselNr").readNullable[String] ~
     (__ \ "idCardNr").readNullable[String] ~
@@ -70,8 +58,9 @@ object User {
     (__ \ "instructorCard").readNullable[String] ~
     (__ \ "instructorSpecialization").readNullable[String] ~
     (__ \ "currentCourses_ids").read[List[String]] ~
-    (__ \ "hiredEquipments_ids").read[List[String]]
-  )(User.apply _)
+    (__ \ "hiredEquipments_ids").read[List[String]] ~
+    (__ \ "payments_ids").read[List[String]]
+    )(User.apply _)
 
   implicit val userWrites: Writes[User] = Json.writes[User]
 
