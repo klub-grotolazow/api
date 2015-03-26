@@ -48,19 +48,19 @@ class EquipmentCtrl extends Controller with MongoDatabase[Equipment] {
     ).getOrElse(NotFound)
   }
 
-  def createHire(equipmentId: String) = Action(parse.json) { request =>
-    request.body.validate[EquipmentHire].map(hire =>
+  def hire(equipmentId: String) = Action(parse.json) { request =>
+    request.body.validate[EquipmentHire].map(hire => {
       findOne("equipments", equipmentId).map { equipment =>
-        update("equipments", equipmentId, equipment.copy(hireHistory = equipment.hireHistory :+ hire)).map(equipment => 
+        update("equipments", equipmentId, equipment.copy(hireHistory = equipment.hireHistory :+ hire)).map(equipment =>
           Ok(Json.toJson(equipment)).withHeaders(jsonHeader)
         ).getOrElse(NotFound)
       }.getOrElse(NotFound)
-    ).recoverTotal {
+    }).recoverTotal {
       e => BadRequest("Detected error:" + JsError.toFlatJson(e))
     }
   }
 
-  def getHiresList(equipmentId: String) = Action {
+  def listHires(equipmentId: String) = Action {
     findOne("equipments", equipmentId).map(equipment => 
       Ok(Json.toJson(equipment.hireHistory)).withHeaders(jsonHeader)
     ).getOrElse(NotFound)

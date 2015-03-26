@@ -49,7 +49,7 @@ class CourseCtrl extends Controller with MongoDatabase[Course] {
     ).getOrElse(NotFound)
   }
 
-  def createMeeting(courseId: String) = Action(parse.json) { request =>
+  def addMeeting(courseId: String) = Action(parse.json) { request =>
     request.body.validate[CourseMeeting].map(meeting =>
       findOne("courses", courseId).map { course =>
         update("courses", courseId, course.copy(meetingHistory = course.meetingHistory :+ meeting)).map(course =>
@@ -61,7 +61,7 @@ class CourseCtrl extends Controller with MongoDatabase[Course] {
     }
   }
 
-  def getMeetingsList(courseId: String) = Action {
+  def listMeetings(courseId: String) = Action {
     findOne("courses", courseId).map(course =>
       Ok(Json.toJson(course.meetingHistory)).withHeaders(jsonHeader)
     ).getOrElse(NotFound)
@@ -99,7 +99,7 @@ class CourseCtrl extends Controller with MongoDatabase[Course] {
     ).getOrElse(NotFound)
   }
 
-  def getMeetingMembers(courseId: String, meetingId: String) = Action {
+  def listMeetingMembers(courseId: String, meetingId: String) = Action {
     findOne("courses", courseId).map { course: Course =>
       val meeting: List[CourseMeeting] = course.meetingHistory.filter(meeting => meeting._id == meetingId)
       if (meeting.isEmpty) NotFound
@@ -139,7 +139,44 @@ class CourseCtrl extends Controller with MongoDatabase[Course] {
     }.getOrElse(NotFound)
   }
 
-  def getMembersList(courseId: String) = Action {
+  def getMeetingInstructor(courseId: String, meetingId: String) = Action {
+    findOne("courses", courseId).map { course: Course =>
+      val meeting: List[CourseMeeting] = course.meetingHistory.filter(meeting => meeting._id == meetingId)
+      if (meeting.isEmpty) NotFound
+      else {
+        new MongoCollection[User].findOne("users", meeting.head.instructor_id).map(instructor =>
+          Ok(Json.toJson(instructor)).withHeaders(jsonHeader)).getOrElse(NotFound)
+      }
+    }.getOrElse(NotFound)
+  }
+  
+  def setMeetingInstructor(courseId: String, meetingId: String, instructorId: String) = Action {
+    findOne("courses", courseId).map { course: Course =>
+      update("courses", courseId, course.copy(meetingHistory = course.meetingHistory.map {
+        case meeting =>
+          if (meeting._id == meetingId && !(meeting.instructor_id equals instructorId)) {
+            meeting.copy(instructor_id = instructorId)
+          } else meeting
+      })).map(course =>
+        Ok(Json.toJson(course)).withHeaders(jsonHeader)
+        ).getOrElse(NotFound)
+    }.getOrElse(NotFound)
+  }
+
+  def removeMeetingInstructor(courseId: String, meetingId: String) = Action {
+    findOne("courses", courseId).map { course: Course =>
+      update("courses", courseId, course.copy(meetingHistory = course.meetingHistory.map {
+        case meeting =>
+          if (meeting._id == meetingId && (!meeting.instructor_id.isEmpty)) {
+            meeting.copy(instructor_id = "")
+          } else meeting
+      })).map(course =>
+        Ok(Json.toJson(course)).withHeaders(jsonHeader)
+        ).getOrElse(NotFound)
+    }.getOrElse(NotFound)
+  }
+  
+  def listMembers(courseId: String) = Action {
     findOne("courses", courseId).map { course: Course =>
       val members: List[User] = new MongoCollection[User].find("users").filter(member =>
         course.members_ids contains member._id)
@@ -168,7 +205,7 @@ class CourseCtrl extends Controller with MongoDatabase[Course] {
     }.getOrElse(NotFound)  
   }
 
-  def getGraduatedMembersList(courseId: String) = Action {
+  def listGraduatedMembers(courseId: String) = Action {
     findOne("courses", courseId).map { course: Course =>
       val graduatedMembers: List[User] = new MongoCollection[User].find("users").filter(member =>
         course.graduatedMembers_ids contains member._id)
@@ -184,7 +221,7 @@ class CourseCtrl extends Controller with MongoDatabase[Course] {
           Ok(Json.toJson(course)).withHeaders(jsonHeader)
         ).getOrElse(NotFound)
       } else Ok(Json.toJson(course)).withHeaders(jsonHeader)
-    }.getOrElse(NotFound)  
+    }.getOrElse(NotFound)
   }
   
   def removeGraduatedMember(courseId: String, memberId: String) = Action {
@@ -197,39 +234,44 @@ class CourseCtrl extends Controller with MongoDatabase[Course] {
     }.getOrElse(NotFound)    
   }
 
-  def getInstructor(courseId: String, instructorId: String) = Action {
-    new MongoCollection[User].findOne("users", instructorId).map(instructor =>
-      Ok(Json.toJson(instructor)).withHeaders(jsonHeader)
-    ).getOrElse(NotFound)
+  def listInstructors(courseId: String) = Action {
+    findOne("courses", courseId).map { course: Course =>
+      val instructors: List[User] = new MongoCollection[User].find("users").filter(instructor =>
+        course.instructors_ids contains instructor._id)
+      if (instructors.isEmpty) NotFound
+      else Ok(Json.toJson(instructors)).withHeaders(jsonHeader)
+    }.getOrElse(NotFound)
   }
 
-  def changeInstructor(courseId: String, instructorId: String) = Action {
+  def addInstructor(courseId: String, instructorId: String) = Action {
     findOne("courses", courseId).map { course: Course =>
-      if (!(course.instructor_id equals instructorId)) {
-        update("courses", courseId, course.copy(instructor_id = instructorId)).map(course =>
+      if (!(course.instructors_ids contains instructorId)) {
+        update("courses", courseId, course.copy(instructors_ids = course.instructors_ids :+ instructorId)).map(course =>
           Ok(Json.toJson(course)).withHeaders(jsonHeader)
         ).getOrElse(NotFound)
       } else Ok(Json.toJson(course)).withHeaders(jsonHeader)
     }.getOrElse(NotFound)
   }
   
-  def removeInstructor(courseId: String) = Action {
+  def removeInstructor(courseId: String, instructorId: String) = Action {
     findOne("courses", courseId).map { course: Course =>
-      if (!course.instructor_id.isEmpty) {
-        update("courses", courseId, course.copy(instructor_id = "")).map(course =>
+      if (course.instructors_ids contains instructorId) {
+        update("courses", courseId, course.copy(instructors_ids = course.instructors_ids diff List(instructorId))).map(course =>
           Ok(Json.toJson(course)).withHeaders(jsonHeader)
         ).getOrElse(NotFound)
       } else Ok(Json.toJson(course)).withHeaders(jsonHeader)
     }.getOrElse(NotFound)
   }
 
-  def getManager(courseId: String, managerId: String) = Action {
-    new MongoCollection[User].findOne("users", managerId).map(instructor =>
-      Ok(Json.toJson(instructor)).withHeaders(jsonHeader)
-    ).getOrElse(NotFound)
+  def getManager(courseId: String) = Action {
+    findOne("courses", courseId).map { course: Course =>
+      new MongoCollection[User].findOne("users", course.manager_id).map(manager =>
+        Ok(Json.toJson(manager)).withHeaders(jsonHeader)
+      ).getOrElse(NotFound)
+    }.getOrElse(NotFound)
   }
 
-  def changeManager(courseId: String, managerId: String) = Action {
+  def setManager(courseId: String, managerId: String) = Action {
     findOne("courses", courseId).map { course: Course =>
       if (!(course.manager_id equals managerId)) {
         update("courses", courseId, course.copy(manager_id = managerId)).map(course =>

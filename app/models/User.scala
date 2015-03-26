@@ -24,12 +24,11 @@ case class User(
                  feeStatus: String,                // todo add Enum
                  hoursPoints: Int,
                  address: Option[Address],
-                 gender: Option[String],           // todo add Enum
                  age: Option[Int],
                  phoneNr: Option[String],
+                 ICEphoneNr: Option[String],
                  indexNr: Option[String],          // todo add Regex       // for student
                  instructorCard: Option[String],   // todo add Regex       // for instructor
-                 instructorSpecialization: Option[String], // todo add Enum// for instructor
                  currentCourses_ids: List[String],
                  hiredEquipments_ids: List[String],
                  payments_ids: List[String]
@@ -51,12 +50,11 @@ object User {
     (__ \ "feeStatus").read[String] ~
     (__ \ "hoursPoints").read[Int] ~
     (__ \ "address").readNullable[Address] ~
-    (__ \ "gender").readNullable[String] ~
     (__ \ "age").readNullable[Int] ~
     (__ \ "phoneNr").readNullable[String] ~
+    (__ \ "ICEphoneNr").readNullable[String] ~
     (__ \ "indexNr").readNullable[String] ~
     (__ \ "instructorCard").readNullable[String] ~
-    (__ \ "instructorSpecialization").readNullable[String] ~
     (__ \ "currentCourses_ids").read[List[String]] ~
     (__ \ "hiredEquipments_ids").read[List[String]] ~
     (__ \ "payments_ids").read[List[String]]
