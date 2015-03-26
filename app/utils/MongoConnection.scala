@@ -8,12 +8,12 @@ import play.api.Play
 
 trait MongoConnection {
   val config = ConfigFactory.load
-//  val uri = MongoClientURI(config.getString("mongodb.herokuDatabaseUri"))
-  val uri = MongoClientURI("mongodb://localhost:27017/") // localhost
+  val uri = MongoClientURI(config.getString("mongodb.herokuDatabaseUri"))
+//  val uri = MongoClientURI("mongodb://localhost:27017/") // localhost
 
   val mongoClient = MongoClient(uri)
-//  val db = mongoClient(uri.database.get)
-  val db = mongoClient("akg") // localhost
+  val db = mongoClient(uri.database.get)
+//  val db = mongoClient("akg") // localhost
 
   /** hack to bypass Play dynamic classloader when serializing to database */
   implicit val ctx = new Context {
