@@ -1,5 +1,10 @@
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
 
+# AUTHORIZATION
+POST     /signup                                                        @controllers.ApplicationCtrl.signup
+POST     /login                                                         @controllers.ApplicationCtrl.login
+POST     /logout                                                        @controllers.ApplicationCtrl.logout
+
 # USER
 POST     /users                                                         @controllers.UserCtrl.create
 GET      /users                                                         @controllers.UserCtrl.getList
@@ -70,10 +75,3 @@ DELETE   /payments/$pId<[a-z0-9]+>                                      @control
 GET      /payments/$pId<[a-z0-9]+>/user                                 @controllers.PaymentCtrl.getUser(pId: String)
 GET      /payments/$pId<[a-z0-9]+>/course                               @controllers.PaymentCtrl.getCourse(pId: String)
 GET      /payments/$pId<[a-z0-9]+>/accounter                            @controllers.PaymentCtrl.getAccounter(pId: String)
-
-# USER ACCOUNT
-POST     /userAccounts                                                  @controllers.UserAccountCtrl.create
-GET      /userAccounts                                                  @controllers.UserAccountCtrl.getList
-GET      /userAccounts/$uaId<[a-z0-9]+>                                 @controllers.UserAccountCtrl.getOne(uaId: String)
-PUT      /userAccounts/$uaId<[a-z0-9]+>                                 @controllers.UserAccountCtrl.edit(uaId: String)
-DELETE   /userAccounts/$uaId<[a-z0-9]+>                                 @controllers.UserAccountCtrl.remove(uaId: String)

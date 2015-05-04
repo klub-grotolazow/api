@@ -19,6 +19,7 @@ case class CourseMeeting(
 case class Course(
                    _id: String,
                    name: String,
+                   description: Option[String],
                    meetingHistory: List[CourseMeeting],
                    members_ids: List[String],            // you can get students number
                    graduatedMembers_ids: List[String],
@@ -45,6 +46,7 @@ object Course {
   implicit val courseReads: Reads[Course] = (
     ((__ \ "_id").read[String] orElse Reads.pure(new ObjectId().toString)) ~
     (__ \ "name").read[String] ~
+    (__ \ "description").readNullable[String] ~
     (__ \ "meetingHistory").read[List[CourseMeeting]] ~
     (__ \ "members_ids").read[List[String]] ~
     (__ \ "graduatedMembers_ids").read[List[String]] ~

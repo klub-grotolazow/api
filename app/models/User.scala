@@ -12,16 +12,25 @@ case class Address(
                     buildingNr: Int,
                     apartmentNr: Option[Int],
                     zipCode: Option[String]   // todo add Regex
-                    )
+                  )
+
+case class Auth(
+                 userName: String,
+                 passwordHash: String,
+                 authToken: String,
+                 tokenExpiredDate: String,
+                 roles: List[String],
+                 feeStatus: String                // todo add Enum
+               )
 
 case class User(
                  _id: String,
+                 auth: Auth,
                  firstName: String,
                  lastName: String,
                  email: String,
                  peselNr: Option[String],          // todo add Regex
                  idCardNr: Option[String],         // todo add Regex
-                 feeStatus: String,                // todo add Enum
                  hoursPoints: Int,
                  address: Option[Address],
                  age: Option[Int],
@@ -39,15 +48,20 @@ object Address {
   implicit val addressWrites: Writes[Address] = Json.writes[Address]
 }
 
+object Auth {
+  implicit val authReads: Reads[Auth] = Json.reads[Auth]
+  implicit val authWrites: Writes[Auth] = Json.writes[Auth]
+}
+
 object User {
   implicit val userReads: Reads[User] = (
     ((__ \ "_id").read[String] orElse Reads.pure(new ObjectId().toString)) ~
+    (__ \ "auth").read[Auth] ~
     (__ \ "firstName").read[String] ~
     (__ \ "lastName").read[String] ~
     (__ \ "email").read(email) ~
     (__ \ "peselNr").readNullable[String] ~
     (__ \ "idCardNr").readNullable[String] ~
-    (__ \ "feeStatus").read[String] ~
     (__ \ "hoursPoints").read[Int] ~
     (__ \ "address").readNullable[Address] ~
     (__ \ "age").readNullable[Int] ~

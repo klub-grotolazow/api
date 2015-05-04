@@ -31,6 +31,13 @@ trait MongoDatabase[T <: AnyRef] extends MongoConnection {
 
     dao.findOneById(id)
   }
+
+  def findOneByCondition(collectionName: String, conditions: Tuple2[String, String]*)(implicit manifest: Manifest[T]): Option[T] = {
+    val collection = db(collectionName)
+    val dao = new SalatDAO[T, String](collection) {}
+println("\n\nCONDITIONS\n" + MongoDBObject(conditions.toList) + "\n")
+    dao.findOne(MongoDBObject(conditions.toList))
+  }
   
   def update(collectionName: String, id: String, modelObject: T)(implicit manifest: Manifest[T]): Option[T] = {
     val collection = db(collectionName)
