@@ -3,13 +3,13 @@ package controllers
 import models.{Course, User, Payment}
 import play.api.libs.json.{JsError, Json}
 import play.api.mvc.{Action, Controller}
-import utils.{MongoCollection, MongoDatabase}
+import utils.{AuthorizationAction, MongoCollection, MongoDatabase}
 
-class PaymentCtrl extends Controller with MongoDatabase[Payment] {
+class PaymentCtrl(action: AuthorizationAction) extends Controller with MongoDatabase[Payment] {
 
   val jsonHeader = ("Content-Type", "application/json")
 
-  def create() = Action(parse.json) { request =>
+  def create() = action.authorize(parse.json) { user => request =>
     request.body.validate[Payment].map { payment =>
       insert("payments", payment)
       Created(Json.toJson(payment)).withHeaders(jsonHeader, "Location" -> s"\\payments\\${payment._id}")
@@ -18,18 +18,18 @@ class PaymentCtrl extends Controller with MongoDatabase[Payment] {
     }
   }
 
-  def getList = Action {
+  def getList = action.authorize(parse.empty) { user => request =>
     val payments: List[Payment] = find("payments")
     Ok(Json.toJson(payments)).withHeaders(jsonHeader)
   }
 
-  def getOne(id: String) = Action {
+  def getOne(id: String) = action.authorize(parse.empty) { user => request =>
     findOne("payments", id).map(payment => 
       Ok(Json.toJson(payment)).withHeaders(jsonHeader)
     ).getOrElse(NotFound)
   }
 
-  def edit(id: String) = Action(parse.json) { request =>
+  def edit(id: String) = action.authorize(parse.json) { user => request =>
     request.body.validate[Payment].map(payment =>
       update("payments", id, payment).map(payment => 
         Ok(Json.toJson(payment)).withHeaders(jsonHeader)
@@ -42,13 +42,13 @@ class PaymentCtrl extends Controller with MongoDatabase[Payment] {
     }
   }
 
-  def remove(id: String) = Action {
+  def remove(id: String) = action.authorize(parse.empty) { user => request =>
     delete("payments", id).map(payment => 
       Ok(Json.toJson(payment)).withHeaders(jsonHeader)
     ).getOrElse(NotFound)
   }
 
-  def getUser(paymentId: String) = Action {
+  def getUser(paymentId: String) = action.authorize(parse.empty) { user => request =>
     findOne("payments", paymentId).map(payment =>
       new MongoCollection[User].findOne("users", payment.user_id).map(user =>
         Ok(Json.toJson(user)).withHeaders(jsonHeader)
@@ -56,7 +56,7 @@ class PaymentCtrl extends Controller with MongoDatabase[Payment] {
     ).getOrElse(NotFound)
   }
   
-  def getCourse(paymentId: String) = Action {
+  def getCourse(paymentId: String) = action.authorize(parse.empty) { user => request =>
       findOne("payments", paymentId).map(payment =>
         new MongoCollection[Course].findOne("courses", payment.course_id).map(course =>
           Ok(Json.toJson(course)).withHeaders(jsonHeader)
@@ -64,7 +64,7 @@ class PaymentCtrl extends Controller with MongoDatabase[Payment] {
       ).getOrElse(NotFound)
   }
   
-  def getAccounter(paymentId: String) = Action {
+  def getAccounter(paymentId: String) = action.authorize(parse.empty) { user => request =>
       findOne("payments", paymentId).map(payment =>
         new MongoCollection[User].findOne("users", payment.accounter_id).map(accounter =>
           Ok(Json.toJson(accounter)).withHeaders(jsonHeader)

@@ -4,13 +4,13 @@ import models._
 import play.api.libs.json.{JsError, Json}
 import play.api.mvc.BodyParsers.parse
 import play.api.mvc._
-import utils.{MongoCollection, MongoDatabase}
+import utils.{MongoCollection, MongoDatabase, AuthorizationAction}
 
-class CourseCtrl extends Controller with MongoDatabase[Course] {
+class CourseCtrl(action: AuthorizationAction) extends Controller with MongoDatabase[Course] {
 
   val jsonHeader = ("Content-Type", "application/json")
 
-  def create() = Action(parse.json) { request =>
+  def create() = action.authorize(parse.json) { user => request =>
     request.body.validate[Course].map { course =>
       insert("courses", course)
       Created(Json.toJson(course)).withHeaders(jsonHeader, "Location" -> s"\\courses\\${course._id}")
@@ -19,18 +19,18 @@ class CourseCtrl extends Controller with MongoDatabase[Course] {
     }
   }
 
-  def getList = Action {
+  def getList = action.authorize(parse.empty) { user => request =>
     val courses: List[Course] = find("courses")
     Ok(Json.toJson(courses)).withHeaders(jsonHeader)
   }
 
-  def getOne(id: String) = Action {
+  def getOne(id: String) = action.authorize(parse.empty) { user => request =>
     findOne("courses", id).map(course => 
       Ok(Json.toJson(course)).withHeaders(jsonHeader)
     ).getOrElse(NotFound)
   }
 
-  def edit(id: String) = Action(parse.json) { request =>
+  def edit(id: String) = action.authorize(parse.json) { user => request =>
     request.body.validate[Course].map(course =>
       update("courses", id, course).map(course => 
         Ok(Json.toJson(course)).withHeaders(jsonHeader)
@@ -43,13 +43,13 @@ class CourseCtrl extends Controller with MongoDatabase[Course] {
     }
   }
 
-  def remove(id: String) = Action {
+  def remove(id: String) = action.authorize(parse.empty) { user => request =>
     delete("courses", id).map(course => 
       Ok(Json.toJson(course)).withHeaders(jsonHeader)
     ).getOrElse(NotFound)
   }
 
-  def addMeeting(courseId: String) = Action(parse.json) { request =>
+  def addMeeting(courseId: String) = action.authorize(parse.json) { user => request =>
     request.body.validate[CourseMeeting].map(meeting =>
       findOne("courses", courseId).map { course =>
         update("courses", courseId, course.copy(meetingHistory = course.meetingHistory :+ meeting)).map(course =>
@@ -61,13 +61,13 @@ class CourseCtrl extends Controller with MongoDatabase[Course] {
     }
   }
 
-  def listMeetings(courseId: String) = Action {
+  def listMeetings(courseId: String) = action.authorize(parse.empty) { user => request =>
     findOne("courses", courseId).map(course =>
       Ok(Json.toJson(course.meetingHistory)).withHeaders(jsonHeader)
     ).getOrElse(NotFound)
   }
 
-  def getOneMeeting(courseId: String, meetingId: String) = Action {
+  def getOneMeeting(courseId: String, meetingId: String) = action.authorize(parse.empty) { user => request =>
     findOne("courses", courseId).map { course =>
       val meeting = course.meetingHistory.filter(meeting => meeting._id == meetingId)
       if (meeting.isEmpty) NotFound
@@ -75,7 +75,7 @@ class CourseCtrl extends Controller with MongoDatabase[Course] {
     }.getOrElse(NotFound)
   }
   
-  def editMeeting(courseId: String, meetingId: String) = Action(parse.json) { request =>
+  def editMeeting(courseId: String, meetingId: String) = action.authorize(parse.json) { user => request =>
     request.body.validate[CourseMeeting].map ( editedMeeting =>
       findOne("courses", courseId).map { course =>
         val editedCourseMeeting: List[CourseMeeting] = course.meetingHistory.map { meeting =>
@@ -91,7 +91,7 @@ class CourseCtrl extends Controller with MongoDatabase[Course] {
     }
   }
 
-  def removeMeeting(courseId: String, meetingId: String) = Action {
+  def removeMeeting(courseId: String, meetingId: String) = action.authorize(parse.empty) { user => request =>
     findOne("courses", courseId).map ( course =>
       update("courses", courseId, course.copy(meetingHistory = course.meetingHistory.filter(meeting => meeting._id != meetingId))).map(course =>
         Ok(Json.toJson(course)).withHeaders(jsonHeader)
@@ -99,7 +99,7 @@ class CourseCtrl extends Controller with MongoDatabase[Course] {
     ).getOrElse(NotFound)
   }
 
-  def listMeetingMembers(courseId: String, meetingId: String) = Action {
+  def listMeetingMembers(courseId: String, meetingId: String) = action.authorize(parse.empty) { user => request =>
     findOne("courses", courseId).map { course: Course =>
       val meeting: List[CourseMeeting] = course.meetingHistory.filter(meeting => meeting._id == meetingId)
       if (meeting.isEmpty) NotFound
@@ -113,7 +113,7 @@ class CourseCtrl extends Controller with MongoDatabase[Course] {
   }
 
   // todo add special cases PartialContent etc
-  def addMeetingMember(courseId: String, meetingId: String, memberId: String) = Action {
+  def addMeetingMember(courseId: String, meetingId: String, memberId: String) = action.authorize(parse.empty) { user => request =>
     findOne("courses", courseId).map { course: Course =>
       update("courses", courseId, course.copy(meetingHistory = course.meetingHistory.map {
         case meeting =>
@@ -126,7 +126,7 @@ class CourseCtrl extends Controller with MongoDatabase[Course] {
     }.getOrElse(NotFound)
   }
   
-  def removeMeetingMember(courseId: String, meetingId: String, memberId: String) = Action {
+  def removeMeetingMember(courseId: String, meetingId: String, memberId: String) = action.authorize(parse.empty) { user => request =>
     findOne("courses", courseId).map { course: Course =>
       update("courses", courseId, course.copy(meetingHistory = course.meetingHistory.map {
         case meeting =>
@@ -139,7 +139,7 @@ class CourseCtrl extends Controller with MongoDatabase[Course] {
     }.getOrElse(NotFound)
   }
 
-  def getMeetingInstructor(courseId: String, meetingId: String) = Action {
+  def getMeetingInstructor(courseId: String, meetingId: String) = action.authorize(parse.empty) { user => request =>
     findOne("courses", courseId).map { course: Course =>
       val meeting: List[CourseMeeting] = course.meetingHistory.filter(meeting => meeting._id == meetingId)
       if (meeting.isEmpty) NotFound
@@ -150,7 +150,7 @@ class CourseCtrl extends Controller with MongoDatabase[Course] {
     }.getOrElse(NotFound)
   }
   
-  def setMeetingInstructor(courseId: String, meetingId: String, instructorId: String) = Action {
+  def setMeetingInstructor(courseId: String, meetingId: String, instructorId: String) = action.authorize(parse.empty) { user => request =>
     findOne("courses", courseId).map { course: Course =>
       update("courses", courseId, course.copy(meetingHistory = course.meetingHistory.map {
         case meeting =>
@@ -163,7 +163,7 @@ class CourseCtrl extends Controller with MongoDatabase[Course] {
     }.getOrElse(NotFound)
   }
 
-  def removeMeetingInstructor(courseId: String, meetingId: String) = Action {
+  def removeMeetingInstructor(courseId: String, meetingId: String) = action.authorize(parse.empty) { user => request =>
     findOne("courses", courseId).map { course: Course =>
       update("courses", courseId, course.copy(meetingHistory = course.meetingHistory.map {
         case meeting =>
@@ -176,7 +176,7 @@ class CourseCtrl extends Controller with MongoDatabase[Course] {
     }.getOrElse(NotFound)
   }
   
-  def listMembers(courseId: String) = Action {
+  def listMembers(courseId: String) = action.authorize(parse.empty) { user => request =>
     findOne("courses", courseId).map { course: Course =>
       val members: List[User] = new MongoCollection[User].find("users").filter(member =>
         course.members_ids contains member._id)
@@ -185,7 +185,7 @@ class CourseCtrl extends Controller with MongoDatabase[Course] {
     }.getOrElse(NotFound)
   }
   
-  def addMember(courseId: String, memberId: String) = Action {
+  def addMember(courseId: String, memberId: String) = action.authorize(parse.empty) { user => request =>
     findOne("courses", courseId).map { course: Course =>
       if (!(course.members_ids contains memberId)) {
         update("courses", courseId, course.copy(members_ids = course.members_ids :+ memberId)).map(course =>
@@ -195,7 +195,7 @@ class CourseCtrl extends Controller with MongoDatabase[Course] {
     }.getOrElse(NotFound)
   }
   
-  def removeMember(courseId: String, memberId: String) = Action {
+  def removeMember(courseId: String, memberId: String) = action.authorize(parse.empty) { user => request =>
     findOne("courses", courseId).map { course: Course =>
       if (course.members_ids contains memberId) {
         update("courses", courseId, course.copy(members_ids = course.members_ids diff List(memberId))).map(course =>
@@ -205,7 +205,7 @@ class CourseCtrl extends Controller with MongoDatabase[Course] {
     }.getOrElse(NotFound)  
   }
 
-  def listGraduatedMembers(courseId: String) = Action {
+  def listGraduatedMembers(courseId: String) = action.authorize(parse.empty) { user => request =>
     findOne("courses", courseId).map { course: Course =>
       val graduatedMembers: List[User] = new MongoCollection[User].find("users").filter(member =>
         course.graduatedMembers_ids contains member._id)
@@ -214,7 +214,7 @@ class CourseCtrl extends Controller with MongoDatabase[Course] {
     }.getOrElse(NotFound)  
   }
   
-  def addGraduatedMember(courseId: String, memberId: String) = Action {
+  def addGraduatedMember(courseId: String, memberId: String) = action.authorize(parse.empty) { user => request =>
     findOne("courses", courseId).map { course: Course =>
       if (!(course.graduatedMembers_ids contains memberId)) {
         update("courses", courseId, course.copy(graduatedMembers_ids = course.graduatedMembers_ids :+ memberId)).map(course =>
@@ -224,7 +224,7 @@ class CourseCtrl extends Controller with MongoDatabase[Course] {
     }.getOrElse(NotFound)
   }
   
-  def removeGraduatedMember(courseId: String, memberId: String) = Action {
+  def removeGraduatedMember(courseId: String, memberId: String) = action.authorize(parse.empty) { user => request =>
     findOne("courses", courseId).map { course: Course =>
       if (course.graduatedMembers_ids contains memberId) {
         update("courses", courseId, course.copy(graduatedMembers_ids = course.graduatedMembers_ids diff List(memberId))).map(course =>
@@ -234,7 +234,7 @@ class CourseCtrl extends Controller with MongoDatabase[Course] {
     }.getOrElse(NotFound)    
   }
 
-  def listInstructors(courseId: String) = Action {
+  def listInstructors(courseId: String) = action.authorize(parse.empty) { user => request =>
     findOne("courses", courseId).map { course: Course =>
       val instructors: List[User] = new MongoCollection[User].find("users").filter(instructor =>
         course.instructors_ids contains instructor._id)
@@ -243,7 +243,7 @@ class CourseCtrl extends Controller with MongoDatabase[Course] {
     }.getOrElse(NotFound)
   }
 
-  def addInstructor(courseId: String, instructorId: String) = Action {
+  def addInstructor(courseId: String, instructorId: String) = action.authorize(parse.empty) { user => request =>
     findOne("courses", courseId).map { course: Course =>
       if (!(course.instructors_ids contains instructorId)) {
         update("courses", courseId, course.copy(instructors_ids = course.instructors_ids :+ instructorId)).map(course =>
@@ -253,7 +253,7 @@ class CourseCtrl extends Controller with MongoDatabase[Course] {
     }.getOrElse(NotFound)
   }
   
-  def removeInstructor(courseId: String, instructorId: String) = Action {
+  def removeInstructor(courseId: String, instructorId: String) = action.authorize(parse.empty) { user => request =>
     findOne("courses", courseId).map { course: Course =>
       if (course.instructors_ids contains instructorId) {
         update("courses", courseId, course.copy(instructors_ids = course.instructors_ids diff List(instructorId))).map(course =>
@@ -263,7 +263,7 @@ class CourseCtrl extends Controller with MongoDatabase[Course] {
     }.getOrElse(NotFound)
   }
 
-  def getManager(courseId: String) = Action {
+  def getManager(courseId: String) = action.authorize(parse.empty) { user => request =>
     findOne("courses", courseId).map { course: Course =>
       new MongoCollection[User].findOne("users", course.manager_id).map(manager =>
         Ok(Json.toJson(manager)).withHeaders(jsonHeader)
@@ -271,7 +271,7 @@ class CourseCtrl extends Controller with MongoDatabase[Course] {
     }.getOrElse(NotFound)
   }
 
-  def setManager(courseId: String, managerId: String) = Action {
+  def setManager(courseId: String, managerId: String) = action.authorize(parse.empty) { user => request =>
     findOne("courses", courseId).map { course: Course =>
       if (!(course.manager_id equals managerId)) {
         update("courses", courseId, course.copy(manager_id = managerId)).map(course =>
@@ -281,7 +281,7 @@ class CourseCtrl extends Controller with MongoDatabase[Course] {
     }.getOrElse(NotFound)
   }
 
-  def removeManager(courseId: String) = Action {
+  def removeManager(courseId: String) = action.authorize(parse.empty) { user => request =>
     findOne("courses", courseId).map { course: Course =>
       if (!course.manager_id.isEmpty) {
         update("courses", courseId, course.copy(manager_id = "")).map(course =>

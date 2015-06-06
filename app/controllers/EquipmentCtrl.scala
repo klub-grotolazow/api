@@ -3,13 +3,13 @@ package controllers
 import models.{User, EquipmentHire, Equipment}
 import play.api.libs.json.{JsError, Json}
 import play.api.mvc._
-import utils.{MongoCollection, MongoDatabase}
+import utils.{AuthorizationAction, MongoCollection, MongoDatabase}
 
-class EquipmentCtrl extends Controller with MongoDatabase[Equipment] {
+class EquipmentCtrl(action: AuthorizationAction) extends Controller with MongoDatabase[Equipment] {
 
   val jsonHeader = ("Content-Type", "application/json")
 
-  def create() = Action(parse.json) { request =>
+  def create() = action.authorize(parse.json) { user => request =>
     request.body.validate[Equipment].map { equipment =>
       insert("equipments", equipment)
       Created(Json.toJson(equipment)).withHeaders(jsonHeader, "Location" -> s"\\equipments\\${equipment._id}")
@@ -18,18 +18,18 @@ class EquipmentCtrl extends Controller with MongoDatabase[Equipment] {
     }
   }
 
-  def getList = Action {
+  def getList = action.authorize(parse.empty) { user => request =>
     val equipments: List[Equipment] = find("equipments")
     Ok(Json.toJson(equipments)).withHeaders(jsonHeader)
   }
 
-  def getOne(id: String) = Action {
+  def getOne(id: String) = action.authorize(parse.empty) { user => request =>
     findOne("equipments", id).map(equipment => 
       Ok(Json.toJson(equipment)).withHeaders(jsonHeader)
     ).getOrElse(NotFound)
   }
 
-  def edit(id: String) = Action(parse.json) { request =>
+  def edit(id: String) = action.authorize(parse.json) { user => request =>
     request.body.validate[Equipment].map(equipment =>
       update("equipments", id, equipment).map(equipment => 
         Ok(Json.toJson(equipment)).withHeaders(jsonHeader)
@@ -42,13 +42,13 @@ class EquipmentCtrl extends Controller with MongoDatabase[Equipment] {
     }
   }
 
-  def remove(id: String) = Action {
+  def remove(id: String) = action.authorize(parse.empty) { user => request =>
     delete("equipments", id).map(equipment => 
       Ok(Json.toJson(equipment)).withHeaders(jsonHeader)
     ).getOrElse(NotFound)
   }
 
-  def hire(equipmentId: String) = Action(parse.json) { request =>
+  def hire(equipmentId: String) = action.authorize(parse.json) { user => request =>
     request.body.validate[EquipmentHire].map(hire => {
       findOne("equipments", equipmentId).map { equipment =>
         update("equipments", equipmentId, equipment.copy(hireHistory = equipment.hireHistory :+ hire)).map(equipment =>
@@ -60,13 +60,13 @@ class EquipmentCtrl extends Controller with MongoDatabase[Equipment] {
     }
   }
 
-  def listHires(equipmentId: String) = Action {
+  def listHires(equipmentId: String) = action.authorize(parse.empty) { user => request =>
     findOne("equipments", equipmentId).map(equipment => 
       Ok(Json.toJson(equipment.hireHistory)).withHeaders(jsonHeader)
     ).getOrElse(NotFound)
   }
 
-  def getOneHire(equipmentId: String, hireId: String) = Action {
+  def getOneHire(equipmentId: String, hireId: String) = action.authorize(parse.empty) { user => request =>
       findOne("equipments", equipmentId).map { equipment =>
         val hire = equipment.hireHistory.filter(hire => hire._id == hireId)
         if (hire.isEmpty) NotFound
@@ -74,7 +74,7 @@ class EquipmentCtrl extends Controller with MongoDatabase[Equipment] {
       }.getOrElse(NotFound)
   }
   
-  def editHire(equipmentId: String, hireId: String) = Action(parse.json) { request =>
+  def editHire(equipmentId: String, hireId: String) = action.authorize(parse.json) { user => request =>
     request.body.validate[EquipmentHire].map ( editedHire =>
       findOne("equipments", equipmentId).map { equipment =>
         val editedEquipmentHire: List[EquipmentHire] = equipment.hireHistory.map { hire =>
@@ -90,7 +90,7 @@ class EquipmentCtrl extends Controller with MongoDatabase[Equipment] {
     }
   }
 
-  def removeHire(equipmentId: String, hireId: String) = Action {
+  def removeHire(equipmentId: String, hireId: String) = action.authorize(parse.empty) { user => request =>
     findOne("equipments", equipmentId).map ( equipment =>
       update("equipments", equipmentId, equipment.copy(hireHistory = equipment.hireHistory.filter(hire => hire._id != hireId))).map(equipment => 
         Ok(Json.toJson(equipment)).withHeaders(jsonHeader)
@@ -98,7 +98,7 @@ class EquipmentCtrl extends Controller with MongoDatabase[Equipment] {
     ).getOrElse(NotFound)
   }
 
-  def getHireUser(equipmentId: String, hireId: String) = Action {
+  def getHireUser(equipmentId: String, hireId: String) = action.authorize(parse.empty) { user => request =>
     findOne("equipments", equipmentId).map { equipment =>
       val hire = equipment.hireHistory.filter(hire => hire._id == hireId)
       if (hire.isEmpty) NotFound
@@ -108,7 +108,7 @@ class EquipmentCtrl extends Controller with MongoDatabase[Equipment] {
     }.getOrElse(NotFound)
   }
 
-  def getHireWarehouseman(equipmentId: String, hireId: String) = Action {
+  def getHireWarehouseman(equipmentId: String, hireId: String) = action.authorize(parse.empty) { user => request =>
     findOne("equipments", equipmentId).map { equipment =>
       val hire = equipment.hireHistory.filter(hire => hire._id == hireId)
       if (hire.isEmpty) NotFound

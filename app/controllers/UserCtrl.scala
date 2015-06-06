@@ -3,13 +3,13 @@ package controllers
 import models._
 import play.api.libs.json._
 import play.api.mvc._
-import utils.{MongoCollection, MongoDatabase, Secured}
+import utils.{MongoCollection, MongoDatabase, AuthorizationAction}
 
-class UserCtrl extends Controller with MongoDatabase[User] with Secured {
+class UserCtrl(action: AuthorizationAction) extends Controller with MongoDatabase[User] {
 
   val jsonHeader = ("Content-Type", "application/json")
 
-  def create() = authorize(parse.json) { user => request =>
+  def create() = action.authorize(parse.json) { user => request =>
     /** needs deserializer implicit Reads */
     request.body.validate[User].map { user =>
         insert("users", user)
@@ -20,18 +20,18 @@ class UserCtrl extends Controller with MongoDatabase[User] with Secured {
     }
   }
 
-  def getList = authorize(parse.empty) { user => request =>
+  def getList = action.authorize(parse.empty) { user => request =>
     val users: List[User] = find("users")
     Ok(Json.toJson(users)).withHeaders(jsonHeader)
   }
 
-  def getOne(id: String) = authorize(parse.empty) { user => request =>
+  def getOne(id: String) = action.authorize(parse.empty) { user => request =>
     findOne("users", id).map(user => 
       Ok(Json.toJson(user)).withHeaders(jsonHeader)
     ).getOrElse(NotFound)
   }
   
-  def edit(id: String) = authorize(parse.json) { user => request =>
+  def edit(id: String) = action.authorize(parse.json) { user => request =>
     request.body.validate[User].map(user =>
       update("users", id, user).map(user => 
         Ok(Json.toJson(user)).withHeaders(jsonHeader)
@@ -44,13 +44,13 @@ class UserCtrl extends Controller with MongoDatabase[User] with Secured {
     }
   }
   
-  def remove(id: String) = authorize(parse.empty) { user => request =>
+  def remove(id: String) = action.authorize(parse.empty) { user => request =>
     delete("users", id).map(user => 
       Ok(Json.toJson(user)).withHeaders(jsonHeader)
     ).getOrElse(NotFound)
   }
   
-  def getCoursesList(userId: String) = authorize(parse.empty) { user => request =>
+  def getCoursesList(userId: String) = action.authorize(parse.empty) { user => request =>
     try{
       findOne("users", userId).map(user => {
         val courses: List[Course] = user.currentCourses_ids.map(course_id =>
@@ -63,7 +63,7 @@ class UserCtrl extends Controller with MongoDatabase[User] with Secured {
     }
   }
 
-  def getEquipmentsList(userId: String) = authorize(parse.empty) { user => request =>
+  def getEquipmentsList(userId: String) = action.authorize(parse.empty) { user => request =>
     try {
       findOne("users", userId).map(user => {
         val equipments: List[Equipment] = user.hiredEquipments_ids.map(equipment_id =>
@@ -76,7 +76,7 @@ class UserCtrl extends Controller with MongoDatabase[User] with Secured {
     }
   }
 
-  def getPaymentsList(userId: String) = authorize(parse.empty) { user => request =>
+  def getPaymentsList(userId: String) = action.authorize(parse.empty) { user => request =>
     try {
       findOne("users", userId).map(user => {
         val payments: List[Payment] = user.payments_ids.map(payment_id =>
