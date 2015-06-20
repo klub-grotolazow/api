@@ -15,7 +15,6 @@ trait ApplicationModule {
   lazy val userController = wire[UserCtrl]
 }
 
-
 object Global extends GlobalSettings {
 
   var instanceLookup: Wired = _

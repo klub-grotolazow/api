@@ -11,36 +11,35 @@ class ApplicationCtrl(action: AuthorizationAction) extends Controller with Mongo
     request.headers.get("Authorization").map { authenticationToken =>
       authenticationToken split "&" match {
         case Array(userName, password) =>
-          request.body.validate[User].map { user =>
-            println("\nsignUp\n")
-            val authToken = getAuthToken
-            val expiredDate = getExpiredDate
-            val accessToken = getNewToken(userName, authToken, expiredDate, user.auth.roles, user.auth.feeStatus)
-            insert("users", user.copy(auth = user.auth.copy(userName = userName, passwordHash = password, authToken = authToken, tokenExpiredDate = expiredDate)))
-            Created(Json.toJson(user)).withHeaders(
-              "Content-Type" -> "application/json", 
-              "Location" -> s"\\users\\${user._id}",
-              "Authorization" -> accessToken
-            )
-          }.recoverTotal {
-            e => BadRequest("Detected error:" + JsError.toFlatJson(e))
+          if (findOneByCondition("users", "auth.userName" -> userName).nonEmpty) Unauthorized.withHeaders(("WWW-Authenticate", "given userName already exists"))
+          else {
+            request.body.validate[User].map { user =>
+              val authToken = getAuthToken
+              val expiredDate = getExpiredDate
+              val accessToken = getNewToken(userName, authToken, user.auth.roles, user.auth.feeStatus)
+              insert("users", user.copy(auth = user.auth.copy(userName = userName, passwordHash = password, authToken = authToken, tokenExpiredDate = expiredDate)))
+              Created(Json.toJson(user)).withHeaders(
+                "Content-Type" -> "application/json",
+                "Location" -> s"\\users\\${user._id}",
+                "Authorization" -> accessToken
+              )
+            }.recoverTotal {
+              e => BadRequest("Detected error:" + JsError.toFlatJson(e))
+            }
           }
-        case _ => Unauthorized.withHeaders(("WWW-Authenticate", "userName&password"))
+        case  _ => Unauthorized.withHeaders(("WWW-Authenticate", "userName&password"))
       }
     }.getOrElse(Unauthorized.withHeaders(("WWW-Authenticate", "userName&password")))
   }
   
   def login() = Action { request =>
     request.headers.get("Authorization").map { authenticationToken =>
-      println("\nAuthentication\n")
       authenticationToken split "&" match {
         case Array(userName, password) =>
-          println(s"\nuserName, password: $userName, $password\n")
           findOneByCondition("users", "auth.userName" -> userName, "auth.passwordHash" -> password).map { user =>
             val authToken = getAuthToken
-            println("\nauthToken " + authToken + "\n")
             val expiredDate = getExpiredDate
-            val accessToken = getNewToken(userName, authToken, expiredDate, user.auth.roles, user.auth.feeStatus)
+            val accessToken = getNewToken(userName, authToken, user.auth.roles, user.auth.feeStatus)
             update("users", user._id, user.copy(auth = user.auth.copy(authToken = authToken, tokenExpiredDate = expiredDate)))
             Ok.withHeaders(("Authorization", accessToken))
           }.getOrElse(Unauthorized.withHeaders(("WWW-Authenticate", "Password is invalid")))

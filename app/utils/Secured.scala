@@ -19,31 +19,31 @@ trait Secured {
 
   def getNewToken(username: String,
                   authToken: String,
-                  expiredDate: String,
                   roles: List[String],
                   feeStatus: String
                    ): String = {
-    username + "&" + authToken + "&" + expiredDate + "&" + (roles mkString ":") + "&" + feeStatus
+    username + "&" + authToken + "&" + "&" + (roles mkString ":") + "&" + feeStatus
   }
 }
   
-class AuthorizationAction extends Controller with MongoDatabase[User] with Secured {
+class AuthorizationAction extends Controller with MongoDatabase[User] with Secured with AccessControlList {
 
   def authorize[A](parser: BodyParser[A])(f: User => Request[A] => Result): Action[A] = Action(parser) { request =>
     request.headers.get("Authorization").map { authorizationToken =>
       authorizationToken split "&" match {
         case Array(userName, authToken) =>
-          println("\nAuthorize\n")
           findOneByCondition("users", "auth.userName" -> userName, "auth.authToken" -> authToken).map { user =>
-            val expiredDate = dateTimeFormatter.parseDateTime(user.auth.tokenExpiredDate)
-            println("\nINSIDE Authorize token = " + authToken + "\n")
-            if (expiredDate.isAfterNow) {
-              /** updating expiration of used token */
-              update("users", user._id, user.copy(auth = user.auth.copy(tokenExpiredDate = getExpiredDate)))
-              /** composing authorized action */
-              f(user)(request)
+            if(hasAccess(user.auth.roles, request.path, request.method)) {
+              val expiredDate = dateTimeFormatter.parseDateTime(user.auth.tokenExpiredDate)
+              if (expiredDate.isAfterNow) {
+                /** updating expiration of used token */
+                update("users", user._id, user.copy(auth = user.auth.copy(tokenExpiredDate = getExpiredDate)))
+                /** composing authorized action */
+                f(user)(request)
+              }
+              else Unauthorized.withHeaders(("WWW-Authenticate", "Auth token expired"))
             }
-            else Unauthorized.withHeaders(("WWW-Authenticate", "Auth token expired"))
+            else Unauthorized.withHeaders(("WWW-Authenticate", "You don't have permissions to this resource. Please contact your administrator."))
           }.getOrElse(Unauthorized.withHeaders(("WWW-Authenticate", "Auth token is invalid")))
         case _ => Unauthorized.withHeaders(("WWW-Authenticate", "userName&authToken"))
       }
