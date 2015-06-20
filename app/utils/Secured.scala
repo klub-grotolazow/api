@@ -41,9 +41,9 @@ class AuthorizationAction extends Controller with MongoDatabase[User] with Secur
                 /** composing authorized action */
                 f(user)(request)
               }
-              else Unauthorized.withHeaders(("WWW-Authenticate", "Auth token expired"))
+              else RequestTimeout.withHeaders(("WWW-Authenticate", "Auth token expired"))
             }
-            else Unauthorized.withHeaders(("WWW-Authenticate", "You don't have permissions to this resource. Please contact your administrator."))
+            else Forbidden.withHeaders(("WWW-Authenticate", "You don't have permissions to this resource. Please contact your administrator."))
           }.getOrElse(Unauthorized.withHeaders(("WWW-Authenticate", "Auth token is invalid")))
         case _ => Unauthorized.withHeaders(("WWW-Authenticate", "userName&authToken"))
       }
