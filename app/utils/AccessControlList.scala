@@ -24,17 +24,7 @@ trait AccessControlList {
     * * value is a list of HTTP methods which has access to that resource
     */
   private val acl: Map[String, Map[String, List[String]]] = Map(
-    
-//    "/currentUser" -> Map(
-//      SuperUser -> List(GET, PUT),
-//      CourseMember -> List(GET, PUT),
-//      CourseManager -> List(GET, PUT),
-//      Instructor -> List(GET, PUT),
-//      Accounter -> List(GET, PUT),
-//      WarehouseMan -> List(GET, PUT),
-//      Candidate -> List(GET, PUT)
-//    ),
-    
+        
     "/logout" -> Map(
       SuperUser -> List(POST),
       CourseMember -> List(POST),
@@ -43,6 +33,16 @@ trait AccessControlList {
       Accounter -> List(POST),
       Warehouseman -> List(POST),
       Candidate -> List(POST)
+    ),
+
+    "/currentUser" -> Map(
+      SuperUser -> List(GET, PUT),
+      CourseMember -> List(GET, PUT),
+      CourseManager -> List(GET, PUT),
+      Instructor -> List(GET, PUT),
+      Accounter -> List(GET, PUT),
+      Warehouseman -> List(GET, PUT),
+      Candidate -> List(GET, PUT)
     ),
   
     "/users" -> Map(

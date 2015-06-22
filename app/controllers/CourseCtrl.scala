@@ -2,7 +2,6 @@ package controllers
 
 import models._
 import play.api.libs.json.{JsError, Json}
-import play.api.mvc.BodyParsers.parse
 import play.api.mvc._
 import utils.{MongoCollection, MongoDatabase, AuthorizationAction}
 

@@ -17,6 +17,8 @@ class ApplicationCtrl(action: AuthorizationAction) extends Controller with Mongo
               val authToken = getAuthToken
               val expiredDate = getExpiredDate
               val accessToken = getNewToken(userName, authToken, user.auth.roles, user.auth.feeStatus)
+
+              // todo add Cache.set("id", user._id)(app)
               insert("users", user.copy(auth = user.auth.copy(userName = userName, passwordHash = password, authToken = authToken, tokenExpiredDate = expiredDate)))
               Created(Json.toJson(user)).withHeaders(
                 "Content-Type" -> "application/json",
@@ -40,6 +42,8 @@ class ApplicationCtrl(action: AuthorizationAction) extends Controller with Mongo
             val authToken = getAuthToken
             val expiredDate = getExpiredDate
             val accessToken = getNewToken(userName, authToken, user.auth.roles, user.auth.feeStatus)
+
+            // todo add Cache.set("id", user._id)(app)
             update("users", user._id, user.copy(auth = user.auth.copy(authToken = authToken, tokenExpiredDate = expiredDate)))
             Ok(Json.toJson(user)).withHeaders(("Authorization", accessToken))
           }.getOrElse(Unauthorized.withHeaders(("WWW-Authenticate", "Password is invalid")))

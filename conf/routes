@@ -6,6 +6,9 @@ POST     /login                                                         @control
 POST     /logout                                                        @controllers.ApplicationCtrl.logout
 
 # USER
+GET      /currentUser                                                   @controllers.UserCtrl.getCurrent
+PUT      /currentUser                                                   @controllers.UserCtrl.editCurrent
+
 POST     /users                                                         @controllers.UserCtrl.create
 GET      /users                                                         @controllers.UserCtrl.getList
 GET      /users/$uId<[a-z0-9]+>                                         @controllers.UserCtrl.getOne(uId: String)

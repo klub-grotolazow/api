@@ -75,7 +75,4 @@ object User {
     )(User.apply _)
 
   implicit val userWrites: Writes[User] = Json.writes[User]
-
-  implicit val userFormat: Format[User] =
-  Format(userReads, userWrites)
 }

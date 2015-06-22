@@ -1,14 +1,52 @@
 package controllers
 
 import models._
-import play.api.libs.json._
+import play.api.libs.json.{JsError, Json}
 import play.api.mvc._
-import utils.{MongoCollection, MongoDatabase, AuthorizationAction}
+import utils.{AuthorizationAction, MongoCollection, MongoDatabase}
 
 class UserCtrl(action: AuthorizationAction) extends Controller with MongoDatabase[User] {
 
   val jsonHeader = ("Content-Type", "application/json")
+  
 
+  def getCurrent() = action.authorize(parse.empty) { user => request =>
+
+    // todo replace by Cache.getAs[String]("id").get
+    val userName: String = request.headers.get("Authorization").map { token =>
+      token split "&" match {
+        case Array(userName: String, authToken: String) => userName
+        case _ => ""
+      }
+    }.getOrElse("")
+    findOneByCondition("users", "auth.userName" -> userName ).map(user =>
+      Ok(Json.toJson(user)).withHeaders(jsonHeader)
+    ).getOrElse(NotFound)
+  }
+
+  def editCurrent() = action.authorize(parse.json) { user => request =>
+    request.body.validate[User].map{user =>
+
+      // todo replace by Cache.getAs[String]("id").get
+      val userName: String = request.headers.get("Authorization").map { token =>
+        token split "&" match {
+          case Array(userName: String, authToken: String) => userName
+          case _ => ""
+        }
+      }.getOrElse("")
+      val currentId = findOneByCondition("users", "auth.userName" -> userName).get._id
+
+      update("users", currentId, user).map(user =>
+        Ok(Json.toJson(user)).withHeaders(jsonHeader)
+      ).getOrElse {
+        insert("users", user)
+        Created(Json.toJson(user)).withHeaders(jsonHeader)
+      }
+    }.recoverTotal {
+      e => BadRequest("Detected error:" + JsError.toFlatJson(e))
+    }
+  }
+  
   def create() = action.authorize(parse.json) { user => request =>
     /** needs deserializer implicit Reads */
     request.body.validate[User].map { user =>
@@ -29,8 +67,8 @@ class UserCtrl(action: AuthorizationAction) extends Controller with MongoDatabas
     findOne("users", id).map(user => 
       Ok(Json.toJson(user)).withHeaders(jsonHeader)
     ).getOrElse(NotFound)
-  }
-  
+  }  
+
   def edit(id: String) = action.authorize(parse.json) { user => request =>
     request.body.validate[User].map(user =>
       update("users", id, user).map(user => 
