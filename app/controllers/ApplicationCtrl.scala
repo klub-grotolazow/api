@@ -41,7 +41,7 @@ class ApplicationCtrl(action: AuthorizationAction) extends Controller with Mongo
             val expiredDate = getExpiredDate
             val accessToken = getNewToken(userName, authToken, user.auth.roles, user.auth.feeStatus)
             update("users", user._id, user.copy(auth = user.auth.copy(authToken = authToken, tokenExpiredDate = expiredDate)))
-            Ok.withHeaders(("Authorization", accessToken))
+            Ok(Json.toJson(user)).withHeaders(("Authorization", accessToken))
           }.getOrElse(Unauthorized.withHeaders(("WWW-Authenticate", "Password is invalid")))
         case _ => Unauthorized.withHeaders(("WWW-Authenticate", "userName&password"))
       }

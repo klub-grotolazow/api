@@ -22,7 +22,7 @@ trait Secured {
                   roles: List[String],
                   feeStatus: String
                    ): String = {
-    username + "&" + authToken + "&" + "&" + (roles mkString ":") + "&" + feeStatus
+    username + "&" + authToken + "&" + (roles mkString ":") + "&" + feeStatus
   }
 }
   
