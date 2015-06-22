@@ -35,6 +35,16 @@ trait AccessControlList {
 //      Candidate -> List(GET, PUT)
 //    ),
     
+    "/logout" -> Map(
+      SuperUser -> List(POST),
+      CourseMember -> List(POST),
+      CourseManager -> List(POST),
+      Instructor -> List(POST),
+      Accounter -> List(POST),
+      Warehouseman -> List(POST),
+      Candidate -> List(POST)
+    ),
+  
     "/users" -> Map(
       SuperUser -> List(GET, POST),
       CourseMember -> List(),
